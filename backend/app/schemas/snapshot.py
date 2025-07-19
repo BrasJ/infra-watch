@@ -11,5 +11,6 @@ class SnapshotRead(SnapshotBase):
     id: int
     timestamp: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from attributes": True
+    }

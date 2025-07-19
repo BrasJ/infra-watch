@@ -11,5 +11,6 @@ class MetricCreate(MetricBase):
 class MetricRead(MetricBase):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from attributes": True
+    }

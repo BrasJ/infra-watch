@@ -6,11 +6,15 @@ class HostBase(BaseModel):
     ip_address: str | None = None
 
 class HostCreate(HostBase):
-    pass
+    hostname: str
+    ip_address: str
 
 class HostRead(HostBase):
     id: int
+    hostname: str
+    ip_address: str
     created_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from attributes": True
+    }
