@@ -1,12 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.core.config import settings
+from app.routers import host
 
 app = FastAPI(
     title="Infra-Watch API",
     version="0.1.0",
     description="Backend API for collection and serving infrastructure telemetry data."
 )
+
+app.include_router(host.router)
 
 app.add_middleware(
     CORSMiddleware,
