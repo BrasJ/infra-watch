@@ -1,0 +1,5 @@
+# Ignore JetBrains IDE config
+.idea/
+
+# Ignore local planning folder
+docs/planning/
