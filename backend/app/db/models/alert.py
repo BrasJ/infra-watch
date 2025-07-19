@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.db.base import Base
 
@@ -11,4 +11,4 @@ class Alert(Base):
     message = Column(String, nullable=False)
     severity = Column(String, nullable=False)
     acknowledged = Column(Boolean, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
