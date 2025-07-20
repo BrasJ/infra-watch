@@ -12,5 +12,5 @@ class MetricRead(MetricBase):
     id: int
 
     model_config = {
-        "from attributes": True
+        "from_attributes": True
     }

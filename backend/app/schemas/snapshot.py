@@ -12,5 +12,5 @@ class SnapshotRead(SnapshotBase):
     timestamp: datetime
 
     model_config = {
-        "from attributes": True
+        "from_attributes": True
     }

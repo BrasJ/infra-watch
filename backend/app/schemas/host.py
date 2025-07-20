@@ -11,10 +11,8 @@ class HostCreate(HostBase):
 
 class HostRead(HostBase):
     id: int
-    hostname: str
-    ip_address: str
     created_at: datetime
 
     model_config = {
-        "from attributes": True
+        "from_attributes": True
     }
