@@ -12,36 +12,38 @@ router = APIRouter(prefix="/hosts", tags=["hosts"])
 
 @router.post("/", response_model=HostRead)
 def register_host(
-        host: HostCreate,
-        db: Session = Depends(get_db)
+    host: HostCreate,
+    db: Session = Depends(get_db)
 ):
     return create_host(db, host)
 
 @router.get("/", response_model=List[HostRead])
 def list_hosts(
-        db: Session = Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     return get_all_hosts(db)
 
 @router.get("/{host_id}", response_model=HostRead)
 def get_host(
-        host_id: int,
-        db: Session = Depends(get_db)
+    host_id: int,
+    db: Session = Depends(get_db)
 ):
     return get_host_by_id(db, host_id)
 
 @router.put("/{host_id}", response_model=HostRead)
 def update_host_endpoint(
-        host_id: int,
-        host_data: HostCreate,
-        db: Session = Depends(get_db)
+    host_id: int,
+    host_data: HostCreate,
+    db: Session = Depends(get_db)
 ):
     return update_host(db, host_id, host_data)
 
 @router.delete("/{host_id}", status_code=204)
 def delete_host_endpoint(
-        host_id: int,
-        db: Session = Depends(get_db)
+    host_id: int,
+    db: Session = Depends(get_db)
 ):
     delete_host(db, host_id)
     return
+
+print("Registered PUT handler:", [route.path for route in router.routes])

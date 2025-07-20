@@ -21,7 +21,7 @@ def get_host_by_id(db: Session, host_id: int) -> Host:
         raise HTTPException(status_code=404, detail="Host not found")
     return host
 
-def update_host(db:Session, host_id:int, host_data: HostCreate) -> Host:
+def update_host(db:Session, host_id: int, host_data: HostCreate) -> Host:
     host = db.query(Host).filter(Host.id == host_id).first()
     if not host:
         raise HTTPException(status_code=404, detail="Host not found")
@@ -33,7 +33,7 @@ def update_host(db:Session, host_id:int, host_data: HostCreate) -> Host:
     return host
 
 def delete_host(db: Session, host_id: int) -> None:
-    host = db.quesry(Host).filter(Host.id == host_id).first()
+    host = db.query(Host).filter(Host.id == host_id).first()
     if not host:
         raise HTTPException(status_code=404, detail="Host not found")
 
