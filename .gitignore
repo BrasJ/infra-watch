@@ -12,3 +12,12 @@ backend/.env
 
 # Ignore virtual environment
 backend/venv
+
+# Ignore pycache
+__pycache__/
+*.pyc
+*.py[cod]
+*.pyo
+
+# Ignore Alembic logs if any are generated
+alembic.log
