@@ -9,6 +9,6 @@ class SnapshotCreate(SnapshotBase):
 
 class SnapshotRead(SnapshotBase):
     id: int
-    timestamp: datetime
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
