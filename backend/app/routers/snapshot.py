@@ -27,7 +27,7 @@ def retrieve_snapshot(
 ):
     return get_snapshot(db, snapshot_id)
 
-@router.get("/host/{host_id}", response_model=List[SnapshotRead])
+@router.get("/hosts/{host_id}", response_model=List[SnapshotRead])
 def list_host_snapshots(
         host_id: int,
         db: Session = Depends(get_db)
