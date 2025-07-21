@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class MetricBase(BaseModel):
     name: str
@@ -11,6 +11,4 @@ class MetricCreate(MetricBase):
 class MetricRead(MetricBase):
     id: int
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = ConfigDict(from_attributes=True)

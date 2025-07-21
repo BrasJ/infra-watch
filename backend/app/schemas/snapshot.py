@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 class SnapshotBase(BaseModel):
@@ -11,6 +11,4 @@ class SnapshotRead(SnapshotBase):
     id: int
     timestamp: datetime
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = ConfigDict(from_attributes=True)
