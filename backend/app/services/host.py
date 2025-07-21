@@ -6,7 +6,7 @@ from app.db.models.host import Host
 from app.schemas.host import HostCreate
 
 def create_host(db: Session, host_data: HostCreate) -> Host:
-    db_host = Host(**host_data.dict())
+    db_host = Host(**host_data.model_dump())
     db.add(db_host)
     db.commit()
     db.refresh(db_host)
