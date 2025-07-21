@@ -3,14 +3,14 @@ from datetime import datetime
 from typing import Optional
 from enum import Enum
 
-class SeverityLevel(str, Enum):
+class AlertSeverity(str, Enum):
     info = "info"
     warning = "warning"
     critical = "critical"
 
 class AlertBase(BaseModel):
     message: Optional[str] = None
-    severity: Optional[SeverityLevel] = None
+    severity: Optional[AlertSeverity] = None
     acknowledged: Optional[bool] = None
 
 class AlertUpdate(AlertBase):
@@ -18,16 +18,16 @@ class AlertUpdate(AlertBase):
 
 class AlertCreate(AlertBase):
     message: str
-    severity: SeverityLevel
+    severity: AlertSeverity
     acknowledged: bool = False
 
 class AlertUpdate(BaseModel):
     message: Optional[str] = None
-    severity: Optional[SeverityLevel] = None
+    severity: Optional[AlertSeverity] = None
     acknowledged: Optional[bool] = None
 
 class AlertFilter(BaseModel):
-    severity: Optional[SeverityLevel] = None
+    severity: Optional[AlertSeverity] = None
     acknowledged: Optional[bool] = None
 
 class AlertRead(AlertBase):
