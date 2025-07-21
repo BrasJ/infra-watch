@@ -12,19 +12,17 @@ class AlertBase(BaseModel):
     message: Optional[str] = None
     severity: Optional[AlertSeverity] = None
     acknowledged: Optional[bool] = None
+    type: Optional[str] = None
 
 class AlertUpdate(AlertBase):
     model_config = ConfigDict(from_attributes=True)
 
 class AlertCreate(AlertBase):
+    snapshot_id: int
     message: str
     severity: AlertSeverity
+    type: str
     acknowledged: bool = False
-
-class AlertUpdate(BaseModel):
-    message: Optional[str] = None
-    severity: Optional[AlertSeverity] = None
-    acknowledged: Optional[bool] = None
 
 class AlertFilter(BaseModel):
     severity: Optional[AlertSeverity] = None
