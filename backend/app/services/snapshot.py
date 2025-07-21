@@ -19,7 +19,7 @@ def get_snapshot(db: Session, snapshot_id: int) -> Snapshot:
     return snapshot
 
 def list_snapshots_by_host(db: Session, host_id: int) -> List[Snapshot]:
-    return db.query(Snapshot).filter(Snapshot.host == host_id).all()
+    return db.query(Snapshot).filter(Snapshot.host_id == host_id).all()
 
 def delete_snapshot(db: Session, snapshot_id: int) -> None:
     snapshot = db.query(Snapshot).filter(Snapshot.id == snapshot_id).first()
