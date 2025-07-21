@@ -21,7 +21,7 @@ def get_metric_by_id(db: Session, metric_id: int) -> Metric:
         raise HTTPException(status_code=404, detail="Metric not found")
     return metric
 
-def delete_metric_by_id(db: Session, metric_id: int) -> None:
+def delete_metric(db: Session, metric_id: int) -> None:
     metric = db.query(Metric).filter(Metric.id == metric_id).first()
     if not metric:
         raise HTTPException(status_code=404, detail="Metric not found")
