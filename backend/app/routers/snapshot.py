@@ -18,7 +18,7 @@ def register_snapshot(
         snapshot: SnapshotCreate,
         db: Session = Depends(get_db)
 ):
-    return get_snapshot(db, snapshot)
+    return create_snapshot(db, snapshot)
 
 @router.get("/{snapshot_id}", response_model=SnapshotRead)
 def retrieve_snapshot(
