@@ -1,17 +1,19 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+from typing import Optional
 
 class MetricBase(BaseModel):
+    snapshot_id: int
     name: str
-    unit: str | None = None
-    description: str | None = None
+    value: float
+    unit: Optional[str] = None
+    description: Optional[str] = None
 
 class MetricCreate(MetricBase):
-    snapshot_id: int
+    pass
 
 class MetricRead(MetricBase):
     id: int
-    snapshot_id: int
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
