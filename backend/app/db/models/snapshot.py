@@ -11,4 +11,4 @@ class Snapshot(Base):
     host_id = Column(Integer, ForeignKey('hosts.id', ondelete='CASCADE'), nullable=False)
     created_at = Column(DateTime, default=datetime.now(UTC))
     metrics = relationship('Metric', back_populates='snapshot', cascade='all, delete-orphan')
-    host = relationship('Host', backref='snapshots')
+    host = relationship('Host', back_populates='snapshots')
