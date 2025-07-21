@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+from datetime import datetime
 
 class MetricBase(BaseModel):
     name: str
@@ -6,9 +7,11 @@ class MetricBase(BaseModel):
     description: str | None = None
 
 class MetricCreate(MetricBase):
-    pass
+    snapshot_id: int
 
 class MetricRead(MetricBase):
     id: int
+    snapshot_id: int
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

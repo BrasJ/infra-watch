@@ -10,5 +10,5 @@ class Snapshot(Base):
     id = Column(Integer, primary_key=True, index=True)
     host_id = Column(Integer, ForeignKey('hosts.id'), nullable=False)
     timestamp = Column(DateTime, default=lambda: datetime.now(UTC))
-
+    metrics = relationship('Metric', back_populates='snapshot', cascade='all, delete-orphan')
     host = relationship('Host', backref='snapshots')
