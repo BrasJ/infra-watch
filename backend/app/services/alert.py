@@ -50,8 +50,8 @@ def update_alert(
     alert = get_alert(db, alert_id)
 
     update_data = alert_data.model_dump(exclude_unset=True)
-    for key, values in update_data.items():
-        setattr(alert, key, values)
+    for key, value in update_data.items():
+        setattr(alert, key, value)
 
     db.commit()
     db.refresh(alert)
