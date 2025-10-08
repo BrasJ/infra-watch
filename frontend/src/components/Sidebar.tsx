@@ -4,6 +4,7 @@ const navItems = [
     {name: 'Dashboard', path: '/' },
     {name: 'Hosts', path: '/hosts' },
     {name: 'Alerts', path: '/alerts' },
+    {name: 'Metrics', path: '/metrics'},
 ]
 
 export default function Sidebar() {
