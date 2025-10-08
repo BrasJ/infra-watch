@@ -1,6 +1,6 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, true
 from fastapi import HTTPException
 
 from app.db.models.alert import Alert
@@ -40,7 +40,7 @@ def list_alerts(
     if acknowledged is not None:
         filters.append(Alert.acknowledged == acknowledged)
 
-    return db.query(Alert).filter(and_(*filters)).all()
+    return db.query(Alert).filter(and_(true(), *filters)).all()
 
 def update_alert(
     db: Session,
