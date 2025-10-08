@@ -20,10 +20,24 @@ export async function fetchAllMetrics(): Promise<Metric[]> {
     return res.data
 }
 
-export async function fetchAlerts(): Promise<Alert[]> {
-    const response = await api.get('/alerts')
+export async function fetchAlerts(filters: {
+    severity?: string;
+    acknowledged?: boolean;
+} = {}): Promise<Alert[]> {
+    const params = new URLSearchParams()
+
+    if (filters.severity) {
+        params.append('severity', filters.severity)
+    }
+
+    if (filters.acknowledged !== undefined) {
+        params.append('acknowledged', filters.acknowledged.toString())
+    }
+
+    const response = await api.get('/alerts?${params.toString()}')
     return response.data
 }
+
 
 export async function acknowledgeAlert(alertId: number): Promise<Alert> {
     const response = await api.put('/alerts/${alertId}', {

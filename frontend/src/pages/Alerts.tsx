@@ -5,13 +5,23 @@ import type { Alert } from '../types/alert'
 export default function Alerts() {
     const [alerts, setAlerts] = useState<Alert[]>([])
     const [loading, setLoading] = useState(true)
+    const [severityFilter, setSeverityFilter] = useState<string>('')
+    const [ackFilter, setAckFilter] = useState<string>('')
+    const loadAlerts = () => {
+        const filters: { severity?: string; acknowledged?: boolean } = {}
+        if (severityFilter) filters.severity = severityFilter
+        if (ackFilter) filters.acknowledged = ackFilter === 'true'
 
-    useEffect(() => {
-        fetchAlerts()
+        setLoading(true)
+        fetchAlerts(filters)
             .then(data => setAlerts(data))
             .catch(err => console.error("Failed to fetch alerts:", err))
             .finally(() => setLoading(false))
-    }, [])
+    }
+
+    useEffect(() => {
+        loadAlerts()
+    }, [severityFilter, ackFilter])
 
     const handleAcknowledge = async (id: number) => {
         try {
@@ -34,6 +44,31 @@ export default function Alerts() {
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-4">System Alerts</h1>
+
+            {/* Filters */}
+            <div className="mb-4 flex gap-4">
+                <select
+                    className="border p-2 rounded"
+                    value={severityFilter}
+                    onChange={e => setSeverityFilter(e.target.value)}
+                >
+                    <option value="">All Severities</option>
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="critical">Critical</option>
+                </select>
+
+                <select
+                    className="border p-2 rounded"
+                    value={ackFilter}
+                    onChange={e => setAckFilter(e.target.value)}
+                >
+                    <option value="">All States</option>
+                    <option value="true">Acknowledged</option>
+                    <option value="false">Unacknowledged</option>
+                </select>
+            </div>
+
             {loading ? (
                 <p>Loading alerts...</p>
             ) : (
