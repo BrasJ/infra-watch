@@ -28,7 +28,7 @@ def test_get_snapshot(client, snapshot):
     assert response.status_code == 200
     assert response.json()["id"] == snapshot["id"]
 
-def test_list_snapshots_by_host(client, host_for_snapshot, snapshot):
+def test_list_snapshots(client, host_for_snapshot, snapshot):
     response = client.get(f"/snapshots/hosts/{host_for_snapshot['id']}")
     assert response.status_code == 200
     snapshots = response.json()
