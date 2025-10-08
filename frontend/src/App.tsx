@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
-import Sidebar from './components/Sidebar'
+import Sidebar from './components/Sidebar.tsx'
 import Dashboard from './pages/Dashboard.tsx'
-import Hosts from './pages/Hosts'
+import Hosts from './pages/Hosts.tsx'
 import Alerts from './pages/Alerts.tsx'
 
 export default function App() {

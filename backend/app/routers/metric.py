@@ -5,7 +5,7 @@ from typing import List
 from app.schemas.metric import MetricCreate, MetricRead
 from app.services.metric import (
     create_metric,
-    get_metrics_by_snapshot,
+    get_metric_by_snapshot,
     get_metric_by_id,
     delete_metric,
 )

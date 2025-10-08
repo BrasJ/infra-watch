@@ -28,6 +28,8 @@ def update_host(db:Session, host_id: int, host_data: HostCreate) -> Host:
 
     host.hostname = host_data.hostname
     host.ip_address = host_data.ip_address
+    host.os = host_data.os
+    host.status = host_data.status
     db.commit()
     db.refresh(host)
     return host

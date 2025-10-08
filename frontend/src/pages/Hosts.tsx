@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Host } from '../types/host'
+import type { Host } from '../types/host.ts'
 import { fetchHosts } from '../lib/api.ts'
 
 export default function Hosts() {
@@ -32,7 +32,8 @@ export default function Hosts() {
                                 </tr>
                             </thead>
                             <tbody>
-                            {hosts.map(host => (
+                            {Array.isArray(hosts) ? (
+                                hosts.map(host => (
                                     <tr key={host.id} className="border-t">
                                         <td className="px-4 py-2">{host.hostname}</td>
                                         <td className="px-4 py-2">{host.ip_address}</td>
@@ -40,7 +41,10 @@ export default function Hosts() {
                                         <td className="px-4 py-2">{host.status}</td>
                                         <td className="px-4 py-2">{new Date(host.created_at).toLocaleString()}</td>
                                     </tr>
-                                ))}
+                                ))
+                            ) : (
+                                <tr><td colSpan={5}>No host data available</td></tr>
+                            )}
                             </tbody>
                         </table>
                     </div>
@@ -49,6 +53,8 @@ export default function Hosts() {
                             <div key={host.id} className="border rounded-lg p-4 shadow">
                                 <h2 className="text-lg font-semibold">{host.hostname}</h2>
                                 <p className="text-sm text-gray-500">{host.ip_address}</p>
+                                <p className="text-sm text-gray-500">{host.os}</p>
+                                <p className="text-sm text-gray-500">{host.status}</p>
                                 <p className="text-xs text-gray-400 mt-2">{new Date(host.created_at).toLocaleString()}</p>
                             </div>
                         ))}

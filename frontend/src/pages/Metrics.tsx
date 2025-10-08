@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { fetchAllMetrics } from '../lib/api.ts'
-import { Metric } from '../types/metric'
+import type { Metric } from '../types/metric.ts'
 import { format } from 'date-fns'
 
 export default function MetricsDashboard() {
