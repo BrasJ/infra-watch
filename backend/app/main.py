@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.routers import host, metric, snapshot, alert
-from app.api import metric, host, snapshot, alert
+from app.api import metric, host, snapshot, alert, auth
 
 app = FastAPI(
     title="Infra-Watch API",
@@ -15,6 +15,7 @@ app.include_router(host.router)
 app.include_router(metric.router)
 app.include_router(snapshot.router)
 app.include_router(alert.router)
+app.include_router(auth.router)
 
 app.add_middleware(
     CORSMiddleware,
