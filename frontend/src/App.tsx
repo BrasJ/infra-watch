@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
-import Dashboard from './routes/Dashboard'
-import Hosts from './routes/Hosts'
-import Alerts from './routes/Alerts'
+import Dashboard from './pages/Dashboard.tsx'
+import Hosts from './pages/Hosts'
+import Alerts from './pages/Alerts.tsx'
 
 export default function App() {
     return (
