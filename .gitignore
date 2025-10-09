@@ -3,6 +3,7 @@
 
 # Ignore local planning folder
 docs/planning/
+backend/scripts/
 
 # Ignore backend/ script
 init_backend.sh

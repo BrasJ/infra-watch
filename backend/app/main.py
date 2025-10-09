@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.routers import host, metric, snapshot, alert
-from app.api import metric, host, snapshot, alert, auth
+from app.api import snapshot, alerts, auth
 
 app = FastAPI(
     title="Infra-Watch API",
@@ -11,19 +11,24 @@ app = FastAPI(
     description="Backend API for collection and serving infrastructure telemetry data."
 )
 
+origins = [
+    "http://localhost:5173",
+    "http://localhost:5174",  # <- Add this!
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(host.router)
 app.include_router(metric.router)
 app.include_router(snapshot.router)
 app.include_router(alert.router)
 app.include_router(auth.router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.get("/ping")
 def ping():

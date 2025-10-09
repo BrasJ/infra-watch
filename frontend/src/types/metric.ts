@@ -4,5 +4,5 @@ export interface Metric {
     cpu_usage: number
     memory_usage: number
     disk_usage: number
-    timestamp: string
+    created_at: string
 }

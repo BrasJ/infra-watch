@@ -10,13 +10,13 @@ const api = axios.create({
 export default api
 
 export async function fetchHosts() {
-    const response = await api.get('/hosts')
+    const response = await api.get('/hosts/')
     console.log("Fetched hosts:", response.data)
     return response.data
 }
 
 export async function fetchAllMetrics(): Promise<Metric[]> {
-    const res = await api.get('/metrics');
+    const res = await api.get('/metrics/');
     return res.data
 }
 
@@ -31,13 +31,23 @@ export async function fetchAlerts(filters: {
     }
 
     if (filters.acknowledged !== undefined) {
-        params.append('acknowledged', filters.acknowledged.toString())
+        params.append('acknowledged', String(filters.acknowledged))
     }
 
-    const response = await api.get('/alerts?${params.toString()}')
+    const response = await api.get(`/alerts/?${params.toString()}`)
     return response.data
 }
 
+export async function createAlert(payload: {
+      snapshot_id: number
+      message: string
+      severity: 'info' | 'warning' | 'critical'
+      type: string
+      acknowledged: boolean
+}) {
+      const response = await api.post('/alerts/', payload)
+      return response.data
+}
 
 export async function acknowledgeAlert(alertId: number): Promise<Alert> {
     const response = await api.put('/alerts/${alertId}', {
@@ -48,4 +58,14 @@ export async function acknowledgeAlert(alertId: number): Promise<Alert> {
 
 export async function deleteAlert(alertId: number): Promise<void> {
     await api.delete('/alerts/${alertId}')
+}
+
+export async function fetchSnapshots() {
+  const response = await api.get('/snapshots/')
+  return response.data
+}
+
+export async function fetchMetricsBySnapshot(snapshotId: number) {
+  const res = await api.get(`/metrics/snapshot/${snapshotId}`);
+  return res.data;
 }

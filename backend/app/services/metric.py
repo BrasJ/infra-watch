@@ -13,8 +13,9 @@ def create_metric(db: Session, metric_data: MetricCreate) -> Metric:
     db.refresh(metric)
     return metric
 
-def get_metric_by_snapshot(db: Session, snapshot_id: int) -> Optional[Metric]:
-    return db.query(Metric).filter(Metric.snapshot_id == snapshot_id).first()
+def get_metrics_by_snapshot(db: Session, snapshot_id: int) -> List[Metric]:
+    print(f"Fetching metrics for snapshot {snapshot_id}")
+    return db.query(Metric).filter(Metric.snapshot_id == snapshot_id).all()
 
 def get_metric_by_id(db: Session, metric_id: int) -> Metric:
     metric = db.query(Metric).filter(Metric.id == metric_id).first()

@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from app.schemas.metric import MetricCreate, MetricRead
 from app.services.metric import (
     create_metric,
-    get_metric_by_snapshot,
+    get_metrics_by_snapshot,
     get_metric_by_id,
     delete_metric,
+    get_latest_metric_for_host,
+    list_metrics
 )
 from app.db.session import get_db
 
@@ -20,11 +22,20 @@ def register_metric(
 ):
     return create_metric(db, metric)
 
+@router.get("/", response_model=List[MetricRead])
+def list_metrics_endpoint(
+    host_id: Optional[int] = Query(None),
+    limit: int = Query(100),
+    db: Session = Depends(get_db)
+):
+    return list_metrics(db, host_id=host_id, limit=limit)
+
 @router.get("/snapshot/{snapshot_id}", response_model=List[MetricRead])
 def list_metrics_by_snapshot(
         snapshot_id: int,
         db: Session = Depends(get_db)
 ):
+    print(f"Fetching metrics for snapshot {snapshot_id}")
     return get_metrics_by_snapshot(db, snapshot_id)
 
 @router.get("/{metric_id}", response_model=MetricRead)
@@ -33,6 +44,13 @@ def get_metric(
         db: Session = Depends(get_db)
 ):
     return get_metric_by_id(db, metric_id)
+
+@router.get('/latest', response_model=MetricRead)
+def get_latest_metric(
+    host_id: int,
+    db: Session = Depends(get_db)
+):
+    return get_latest_metric_for_host(db, host_id)
 
 @router.delete("/{metric_id}", status_code=204)
 def remove_metric(

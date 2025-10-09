@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchAlerts, acknowledgeAlert, deleteAlert } from '../lib/api'
+import { fetchSnapshots, fetchAlerts, acknowledgeAlert, deleteAlert, createAlert } from '../lib/api'
 import type { Alert } from '../types/alert'
 
 export default function Alerts() {
@@ -20,30 +20,48 @@ export default function Alerts() {
     }
 
     const [newAlert, setNewAlert] = useState({
-          snapshot_id: "",  // You may need to fetch or select this dynamically
-          message: "",
-          severity: "info",
-          type: "system",
-          acknowledged: false
+        snapshot_id: "",  // You may need to fetch or select this dynamically
+        message: "",
+        severity: "info",
+        type: "system",
+        acknowledged: false
     })
+
+    const [snapshots, setSnapshots] = useState<any[]>([])
+
+    useEffect(() => {
+        fetchSnapshots()
+            .then(data => setSnapshots(data))
+            .catch(err => console.error("Failed to fetch snapshots:", err))
+    }, [])
+
 
     useEffect(() => {
         loadAlerts()
     }, [severityFilter, ackFilter])
 
-    const handleCreateAlert = async () => {
+    async function handleCreateAlert() {
         try {
-            const response = await api.post('/alerts', newAlert);
-            setAlerts([...alerts, response.data]); // append to state
+            // Convert snapshot_id to a number before sending to backend
+            const payload = {
+              ...newAlert,
+              snapshot_id: Number(newAlert.snapshot_id),
+            };
+
+            const created = await createAlert(payload);
+            console.log("Created alert:", created);
+
+            // Clear form and refresh table
             setNewAlert({
-              snapshot_id: 0,
-              message: '',
-              severity: '',
-              type: '',
+              snapshot_id: "",
+              message: "",
+              severity: "info",
+              type: "system",
               acknowledged: false,
             });
-        } catch (error) {
-            console.error("Error creating alert:", error);
+            loadAlerts();
+          } catch (err) {
+            console.error("Error creating alert:", err);
         }
     }
 
@@ -140,13 +158,23 @@ export default function Alerts() {
             <div className="mb-6 p-4 border rounded shadow bg-white space-y-4">
               <h2 className="text-lg font-semibold">Create New Alert</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="Snapshot ID"
-                  className="border p-2 rounded"
-                  value={newAlert.snapshot_id}
-                  onChange={(e) => setNewAlert({ ...newAlert, snapshot_id: e.target.value })}
-                />
+                {snapshots.length === 0 ? (
+                  <p>No snapshots available.</p>
+                ) : (
+                  <select
+                      className="border p-2 rounded"
+                      value={newAlert.snapshot_id}
+                      onChange={(e) => setNewAlert({ ...newAlert, snapshot_id: e.target.value })}
+                  >
+                      <option value="">Select Snapshot</option>
+                      {snapshots.map(snapshot => (
+                        <option key={snapshot.id} value={snapshot.id}>
+                          Snapshot {snapshot.id}
+                        </option>
+                    ))}
+                  </select>
+                )}
+
                 <input
                   type="text"
                   placeholder="Message"

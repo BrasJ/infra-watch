@@ -32,7 +32,7 @@ def list_host_snapshots(
         host_id: int,
         db: Session = Depends(get_db)
 ):
-    return list_snapshots_by_host(db, host_id)
+    return list_snapshots(db, host_id)
 
 @router.delete("/{snapshot_id}", status_code=204)
 def remove_snapshot(

@@ -6,7 +6,7 @@ from app.db.session import get_db
 from app.schemas.metric import MetricRead
 from app.services.metric import (
     get_latest_metric_for_host,
-    get_metric_by_snapshot,
+    get_metrics_by_snapshot,
     list_metrics
 )
 
@@ -27,9 +27,9 @@ def get_latest_metric(
 ):
     return get_latest_metric_for_host(db, host_id)
 
-@router.get("/by_snapshot/{snapshot_id}", response_model=MetricRead)
+@router.get("/snapshot/{snapshot_id}", response_model=MetricRead)
 def get_metric_by_snapshot_endpoint(
     snapshot_id: int,
     db: Session = Depends(get_db)
 ):
-    return get_metric_by_snapshot(db, snapshot_id)
+    return get_metrics_by_snapshot(db, snapshot_id)
