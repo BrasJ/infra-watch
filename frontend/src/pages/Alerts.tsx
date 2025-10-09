@@ -19,9 +19,33 @@ export default function Alerts() {
             .finally(() => setLoading(false))
     }
 
+    const [newAlert, setNewAlert] = useState({
+          snapshot_id: "",  // You may need to fetch or select this dynamically
+          message: "",
+          severity: "info",
+          type: "system",
+          acknowledged: false
+    })
+
     useEffect(() => {
         loadAlerts()
     }, [severityFilter, ackFilter])
+
+    const handleCreateAlert = async () => {
+        try {
+            const response = await api.post('/alerts', newAlert);
+            setAlerts([...alerts, response.data]); // append to state
+            setNewAlert({
+              snapshot_id: 0,
+              message: '',
+              severity: '',
+              type: '',
+              acknowledged: false,
+            });
+        } catch (error) {
+            console.error("Error creating alert:", error);
+        }
+    }
 
     const handleAcknowledge = async (id: number) => {
         try {
@@ -84,38 +108,85 @@ export default function Alerts() {
                         </tr>
                     </thead>
                     <tbody>
-                        {alerts.map(alert => (
-                            <tr key={alert.id} className="border-t">
-                                <td className="px-4 py-2">{alert.message}</td>
-                                <td className="px-4 py-2">{alert.severity}</td>
-                                <td className="px-4 py-2">{alert.type}</td>
-                                <td className="px-4 py-2">
-                                    {alert.acknowledged ? '✅' : '❌'}
-                                </td>
-                                <td className="px-4 py-2">
-                                    {new Date(alert.created_at).toLocaleString()}
-                                </td>
-                                <td className="px-4 py-2 space-x-2">
-                                    {!alert.acknowledged && (
-                                        <button
-                                            className="text-blue-600 hover:underline"
-                                            onClick={() => handleAcknowledge(alert.id)}
-                                        >
-                                            Acknowledge
-                                        </button>
-                                    )}
-                                    <button
-                                        className="text-red-600 hover:underline"
-                                        onClick={() => handleDelete(alert.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                      {alerts.map((alert) => {
+                        let rowClass = ""
+                        switch (alert.severity) {
+                          case "critical":
+                            rowClass = "bg-red-100 text-red-800"
+                            break
+                          case "warning":
+                            rowClass = "bg-yellow-100 text-yellow-800"
+                            break
+                          case "info":
+                            rowClass = "bg-blue-100 text-blue-800"
+                            break
+                          default:
+                            rowClass = ""
+                        }
+
+                        return (
+                          <tr key={alert.id} className={`border-t ${rowClass}`}>
+                            <td className="px-4 py-2">{alert.message}</td>
+                            <td className="px-4 py-2">{alert.severity}</td>
+                            <td className="px-4 py-2">{alert.type}</td>
+                            <td className="px-4 py-2">{alert.acknowledged ? "Yes" : "No"}</td>
+                            <td className="px-4 py-2">{new Date(alert.created_at).toLocaleString()}</td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                 </table>
             )}
+            <div className="mb-6 p-4 border rounded shadow bg-white space-y-4">
+              <h2 className="text-lg font-semibold">Create New Alert</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="Snapshot ID"
+                  className="border p-2 rounded"
+                  value={newAlert.snapshot_id}
+                  onChange={(e) => setNewAlert({ ...newAlert, snapshot_id: e.target.value })}
+                />
+                <input
+                  type="text"
+                  placeholder="Message"
+                  className="border p-2 rounded"
+                  value={newAlert.message}
+                  onChange={(e) => setNewAlert({ ...newAlert, message: e.target.value })}
+                />
+                <select
+                  className="border p-2 rounded"
+                  value={newAlert.severity}
+                  onChange={(e) => setNewAlert({ ...newAlert, severity: e.target.value })}
+                >
+                  <option value="info">Info</option>
+                  <option value="warning">Warning</option>
+                  <option value="critical">Critical</option>
+                </select>
+                <select
+                  className="border p-2 rounded"
+                  value={newAlert.type}
+                  onChange={(e) => setNewAlert({ ...newAlert, type: e.target.value })}
+                >
+                  <option value="system">System</option>
+                  <option value="network">Network</option>
+                </select>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={newAlert.acknowledged}
+                    onChange={(e) => setNewAlert({ ...newAlert, acknowledged: e.target.checked })}
+                  />
+                  <span>Acknowledged</span>
+                </label>
+              </div>
+              <button
+                onClick={handleCreateAlert}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Create Alert
+              </button>
+            </div>
         </div>
     )
 }

@@ -6,7 +6,7 @@ from app.db.session import get_db
 from app.schemas.snapshot import SnapshotCreate, SnapshotRead
 from app.services.snapshot import (
     create_snapshot,
-    get_snapshot_by_id,
+    get_snapshot,
     list_snapshots,
     delete_snapshot,
 )
