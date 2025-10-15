@@ -26,43 +26,47 @@ export default function MetricsDashboard() {
     }
   }, [selectedSnapshot])
 
-  const groupByHost = (metricField: keyof Metric) => {
+  const groupBySnapshot = (metricName: string) => {
     const grouped: Record<number, { timestamp: string; value: number }[]> = {}
-    metrics.forEach(metric => {
-      if (!grouped[metric.host_id]) grouped[metric.host_id] = []
-      grouped[metric.host_id].push({
-        timestamp: format(new Date(metric.created_at), 'HH:mm:ss'),
-        value: metric[metricField] as number,
+    metrics
+      .filter(metric => metric.name === metricName)
+      .forEach(metric => {
+        console.log("metric object", metric)
+        const groupKey = metric.snapshot_id
+        if (!grouped[groupKey]) grouped[groupKey] = []
+        grouped[groupKey].push({
+          timestamp: format(new Date(metric.created_at), 'HH:mm:ss'),
+          value: metric.value,
+        })
+        //grouped[groupKey].sort((a, b) => a.timestamp.localecompare(b.timestamp))
       })
-    })
+    console.log("Grouped data", grouped)
     return grouped
   }
 
-  const renderChart = (title: string, metricField: keyof Metric, color: string) => {
-    const dataByHost = groupByHost(metricField)
+  const renderChart = (title: string, metricName: string, color: string) => {
+    const dataBySnapshot = groupBySnapshot(metricName)
     return (
       <div className="mb-10">
         <h2 className="text-xl font-semibold mb-2">{title}</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="timestamp" />
-            <YAxis domain={[0, 100]} />
-            <Tooltip />
-            <Legend />
-            {Object.entries(dataByHost).map(([hostId, data], index) => (
-              <Line
-                key={hostId}
-                dataKey="value"
-                data={data}
-                name={`Host ${hostId}`}
-                type="monotone"
-                stroke={`hsl(${(index * 50) % 360}, 70%, 50%)`}
-                dot={false}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+        {Object.entries(dataBySnapshot).map(([snapshotId, data], index) =>(
+          <ResponsiveContainer width="100%" height={300} key={snapshotId}>
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="timestamp" />
+              <YAxis domain={[0, 100]} />
+              <Tooltip />
+              <Legend />
+                <Line
+                  dataKey="value"
+                  name={`Snapshot ${snapshotId}`}
+                  type="monotone"
+                  stroke={`hsl(${(index * 50) % 360}, 70%, 50%)`}
+                  dot={false}
+                />
+            </LineChart>
+          </ResponsiveContainer>
+        ))}
       </div>
     )
   }
