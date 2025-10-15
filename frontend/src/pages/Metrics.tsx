@@ -40,35 +40,44 @@ export default function MetricsDashboard() {
         })
         //grouped[groupKey].sort((a, b) => a.timestamp.localecompare(b.timestamp))
       })
-    console.log("Grouped data", grouped)
     return grouped
   }
 
-  const renderChart = (title: string, metricName: string, color: string) => {
+  const renderChart = (title: string, metricName: string) => {
     const dataBySnapshot = groupBySnapshot(metricName)
-    return (
-      <div className="mb-10">
-        <h2 className="text-xl font-semibold mb-2">{title}</h2>
-        {Object.entries(dataBySnapshot).map(([snapshotId, data], index) =>(
-          <ResponsiveContainer width="100%" height={300} key={snapshotId}>
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="timestamp" />
-              <YAxis domain={[0, 100]} />
-              <Tooltip />
-              <Legend />
+    return Object.entries(dataBySnapshot).map(([snapshotId, data], index) => {
+      const values = data.map(point => point.value)
+      const average = (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(2)
+      const min = Math.min(...values).toFixed(2)
+      const max = Math.max(...values).toFixed(2)
+
+      return (
+          <div className="mb-10">
+            <h2 className="text-xl font-semibold mb-2">{title}</h2>
+            <ResponsiveContainer width="100%" height={300} key={snapshotId}>
+              <LineChart data={data}>
+                <CartesianGrid strokeDasharray="3 3"/>
+                <XAxis dataKey="timestamp"/>
+                <YAxis domain={[0, 100]}/>
+                <Tooltip/>
+                <Legend/>
                 <Line
-                  dataKey="value"
-                  name={`Snapshot ${snapshotId}`}
-                  type="monotone"
-                  stroke={`hsl(${(index * 50) % 360}, 70%, 50%)`}
-                  dot={false}
+                    dataKey="value"
+                    name={`Snapshot ${snapshotId}`}
+                    type="monotone"
+                    stroke={`hsl(${(index * 50) % 360}, 70%, 50%)`}
+                    dot={false}
                 />
-            </LineChart>
-          </ResponsiveContainer>
-        ))}
-      </div>
-    )
+              </LineChart>
+            </ResponsiveContainer>
+            <div className="text-sm text-gray-600 mt-2">
+              <span className="mr-4">Average: <strong>{average}%</strong></span><br />
+              <span className="mr-4">Min: <strong>{min}%</strong></span><br />
+              <span className="mr-4">Max: <strong>{max}%</strong></span><br />
+            </div>
+          </div>
+      )
+    })
   }
 
   return (
