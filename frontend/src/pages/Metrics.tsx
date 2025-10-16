@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { fetchAllMetrics, fetchMetricsBySnapshot, fetchSnapshots } from '../lib/api.ts'
+import {fetchAllMetrics, fetchGroupedMetricsByHost, fetchMetricsBySnapshot, fetchSnapshots} from '../lib/api.ts'
 import type { Metric } from '../types/metric.ts'
 import { format } from 'date-fns'
 
@@ -9,6 +9,8 @@ export default function MetricsDashboard() {
   const [snapshots, setSnapshots] = useState<any[]>([])
   const [selectedSnapshot, setSelectedSnapshot] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  const [selectedHost, setSelectedHost] = useState<number | null>(null)
+  const [selectedSnapshots, setSelectedSnapshots] = useState<number[]>([])
 
   useEffect(() => {
     fetchSnapshots()
@@ -17,111 +19,110 @@ export default function MetricsDashboard() {
   }, [])
 
   useEffect(() => {
-    if (selectedSnapshot !== null) {
       setLoading(true)
-      fetchMetricsBySnapshot(selectedSnapshot)
-        .then(setMetrics)
+      fetchGroupedMetricsByHost()
+        .then((data) => {
+            console.log("Fetched metrics:", data)
+            setMetrics(data)
+        })
         .catch(err => console.error("Failed to load metrics", err))
         .finally(() => setLoading(false))
-    }
-  }, [selectedSnapshot])
+  }, [])
 
-  const groupBySnapshot = (metricName: string) => {
-    const grouped: Record<number, { timestamp: string; value: number }[]> = {}
-    metrics
-      .filter(metric => metric.name === metricName)
-      .forEach(metric => {
-        console.log("metric object", metric)
-        const groupKey = metric.snapshot_id
-        if (!grouped[groupKey]) grouped[groupKey] = []
-        grouped[groupKey].push({
-          timestamp: format(new Date(metric.created_at), 'HH:mm:ss'),
-          value: metric.value,
-        })
-        //grouped[groupKey].sort((a, b) => a.timestamp.localecompare(b.timestamp))
-      })
-    return grouped
-  }
+  const groupByHostMetricForSnapshotLines = (metricName: string) => {
+  const grouped: Record<
+    number,
+    Record<string, Record<string, number>>
+  > = {}
 
-  const renderChart = (title: string, metricName: string, color: string) => {
-    const dataBySnapshot = groupBySnapshot(metricName)
+  metrics
+    .filter(m => m.name === metricName)
+    .forEach(m => {
+      const hostId = m.host_id
+      const date = new Date(m.created_at)
+      const minutes = date.getHours() * 60 + date.getMinutes()
+      const snapshotKey = `snapshot_${m.snapshot_id}`
+
+      if (!grouped[hostId]) grouped[hostId] = {}
+      if (!grouped[hostId][minutes]) grouped[hostId][minutes] = {}
+      grouped[hostId][minutes][snapshotKey] = m.value
+    })
+
+  // Convert each host’s grouped data into chart-compatible arrays
+  const chartDataPerHost: Record<number, any[]> = {}
+
+  Object.entries(grouped).forEach(([hostId, minuteMap]) => {
+    const rows = Object.entries(minuteMap).map(([minutes, snapshotMap]) => ({
+      minutes: Number(minutes),
+      ...snapshotMap
+    }))
+    chartDataPerHost[Number(hostId)] = rows
+  })
+
+  return chartDataPerHost
+}
+
+
+  const renderChart = (title: string, metricName: string) => {
+  const dataByHost = groupByHostMetricForSnapshotLines(metricName)
+
+  return Object.entries(dataByHost).map(([hostId, chartData]) => {
+    const snapshotKeys = Object.keys(chartData[0] || {}).filter(key => key !== 'minutes')
+      console.log("Snapshot keys:", snapshotKeys)
+      console.log("Chart data:", chartData)
+
     return (
-      <div className="flex flex-col gap-12">
-          {Object.entries(dataBySnapshot).map(([snapshotId, data], index) => {
-              const values = data.map(point => point.value)
-              const average = (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(2)
-              const min = Math.min(...values).toFixed(2)
-              const max = Math.max(...values).toFixed(2)
-
-              return (
-                  <div key={snapshotId}>
-                    <h2 className="text-xl font-semibold mb-2">{title} (Snapshot {snapshotId})</h2>
-                    <div className="w-full h-[300px] min-w-0">
-                        <ResponsiveContainer width="95%" height="100%">
-                          <LineChart data={data}>
-                            <CartesianGrid strokeDasharray="3 3"/>
-                            <XAxis dataKey="timestamp"/>
-                            <YAxis domain={[0, 100]}/>
-                            <Tooltip/>
-                            <Legend/>
-                            <Line
-                                dataKey="value"
-                                name={`Snapshot ${snapshotId}`}
-                                type="monotone"
-                                stroke={`hsl(${(index * 50) % 360}, 70%, 50%)`}
-                                dot={false}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-                    <div className="text-sm text-gray-600 mt-2">
-                      <span className="mr-4">Average: <strong>{average}%</strong></span><br />
-                      <span className="mr-4">Min: <strong>{min}%</strong></span><br />
-                      <span className="mr-4">Max: <strong>{max}%</strong></span><br />
-                    </div>
-                  </div>
-              )
-            })}
+      <div key={hostId} className="mb-12">
+        <h2 className="text-xl font-semibold mb-2">
+          {title} — Host {hostId}
+        </h2>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="95%" height="100%">
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                  dataKey="minutes"
+                  type="number"
+                  domain={[0, 1440]}
+                  ticks={[...Array(25).keys()].map(h => h * 60)}
+                  tickFormatter={(value) => `${String(value / 60).padStart(2, '0')}:00`}
+                  label={{ value: "Time of Day", position: "insideBottomRight", offset: -5 }}
+              />
+              <YAxis domain={[0, 100]} />
+              <Tooltip />
+              <Legend />
+              {snapshotKeys.map((key, i) => (
+                <Line
+                  key={key}
+                  dataKey={key}
+                  name={`Snapshot ${key.split('_')[1]}`}
+                  type="monotone"
+                  stroke={`hsl(${(i * 60) % 360}, 70%, 50%)`}
+                  dot={false}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     )
-  }
+  })
+}
 
   return (
     <div className="w-full min-w-0">
       <h1 className="text-2xl font-bold mb-6">Metrics Dashboard</h1>
-
-      <div className="mb-6">
-        <label className="block font-semibold mb-1">Select Snapshot:</label>
-        <select
-          className="border p-2 rounded"
-          value={selectedSnapshot ?? ''}
-          onChange={(e) => {
-            const value = Number(e.target.value)
-            setSelectedSnapshot(isNaN(value) ? null : value)
-          }}
-        >
-          <option value="">-- Select Snapshot --</option>
-          {snapshots.map((snap) => (
-            <option key={snap.id} value={snap.id}>
-              Snapshot {snap.id} - Host {snap.host_id}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {loading ? (
         <p>Loading metrics...</p>
+      ) : metrics.length > 0 ? (
+        <>
+            {renderChart('CPU Usage (%)', 'cpu_usage')}
+            {renderChart('Memory Usage (%)', 'memory_usage')}
+            {renderChart('Disk Usage (%)', 'disk_usage')}
+        </>
       ) : (
-        selectedSnapshot && metrics.length > 0 ? (
-          <>
-            {renderChart('CPU Usage (%)', 'cpu_usage', '#3b82f6')}
-            {renderChart('Memory Usage (%)', 'memory_usage', '#10b981')}
-            {renderChart('Disk Usage (%)', 'disk_usage', '#f59e0b')}
-          </>
-        ) : selectedSnapshot ? (
-          <p>No metrics found for this snapshot.</p>
-        ) : null
-      )}
+        <p>No metrics found.</p>
+    )}
     </div>
   )
 }

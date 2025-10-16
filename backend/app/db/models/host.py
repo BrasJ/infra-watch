@@ -14,3 +14,4 @@ class Host(Base):
     status = Column(String, nullable=True)
     snapshots = relationship('Snapshot', back_populates='host', cascade="all, delete-orphan")
     created_at = Column(DateTime, default=lambda: datetime.now(UTC))
+    metrics = relationship('Metric', back_populates='host')

@@ -5,6 +5,7 @@ from sqlalchemy import desc
 
 from app.db.models.metric import Metric
 from app.schemas.metric import MetricCreate, MetricRead
+from app.db.models.snapshot import Snapshot
 
 def create_metric(db: Session, metric_data: MetricCreate) -> Metric:
     metric = Metric(**metric_data.model_dump())
@@ -43,3 +44,22 @@ def delete_metric(db: Session, metric_id: int) -> None:
         raise HTTPException(status_code=404, detail="Metric not found")
     db.delete(metric)
     db.commit()
+
+def list_metrics_with_hosts(db: Session) -> List[dict]:
+    results = (
+        db.query(Metric, Snapshot.host_id)
+        .join(Snapshot, Metric.snapshot_id == Snapshot.id)
+        .all()
+    )
+
+    return [
+        {
+            "id": metric.id,
+            "name": metric.name,
+            "value": metric.value,
+            "created_at": metric.created_at,
+            "snapshot_id": metric.snapshot_id,
+            "host_id": host_id,
+        }
+        for metric, host_id in results
+    ]

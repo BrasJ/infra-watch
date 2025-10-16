@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from app.schemas.metric import MetricCreate, MetricRead
+from app.schemas.metric import MetricCreate, MetricRead, MetricGroupedByHost
 from app.services.metric import (
     create_metric,
     get_metrics_by_snapshot,
@@ -59,3 +59,10 @@ def remove_metric(
 ):
     delete_metric(db, metric_id)
     return
+
+@router.get("/grouped/host", response_model=List[MetricGroupedByHost])
+def get_metrics_grouped_by_host(
+    db: Session = Depends(get_db)
+):
+    from app.services.metric import list_metrics_with_hosts
+    return list_metrics_with_hosts(db)
