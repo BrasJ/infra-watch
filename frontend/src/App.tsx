@@ -7,16 +7,16 @@ import MetricsDashboard from './pages/Metrics.tsx'
 
 export default function App() {
     return (
-        <div className="flex h-screen bg-gray-100 text-gray-900">
+        <div className="flex min-h-screen w-screen px-6 pl-8 bg-gray-100 text-gray-900">
             <Sidebar />
-            <div className="flex-1 p-6 overflow-y-auto">
+            <main className="flex-1 overflow-x-auto min-w-0">
                 <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/hosts" element={<Hosts />} />
                     <Route path="/alerts" element={<Alerts />} />
                     <Route path="/metrics" element={<MetricsDashboard />} />
                 </Routes>
-            </div>
+            </main>
         </div>
     )
 }

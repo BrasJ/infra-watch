@@ -10,9 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <BrowserRouter>
             <App />
-            <Routes>
-                <Route path="/metrics" element={<MetricsDashboard />} />
-            </Routes>
+
         </BrowserRouter>
     </React.StrictMode>
 )

@@ -43,45 +43,51 @@ export default function MetricsDashboard() {
     return grouped
   }
 
-  const renderChart = (title: string, metricName: string) => {
+  const renderChart = (title: string, metricName: string, color: string) => {
     const dataBySnapshot = groupBySnapshot(metricName)
-    return Object.entries(dataBySnapshot).map(([snapshotId, data], index) => {
-      const values = data.map(point => point.value)
-      const average = (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(2)
-      const min = Math.min(...values).toFixed(2)
-      const max = Math.max(...values).toFixed(2)
+    return (
+      <div className="flex flex-col gap-12">
+          {Object.entries(dataBySnapshot).map(([snapshotId, data], index) => {
+              const values = data.map(point => point.value)
+              const average = (values.reduce((sum, v) => sum + v, 0) / values.length).toFixed(2)
+              const min = Math.min(...values).toFixed(2)
+              const max = Math.max(...values).toFixed(2)
 
-      return (
-          <div className="mb-10">
-            <h2 className="text-xl font-semibold mb-2">{title}</h2>
-            <ResponsiveContainer width="100%" height={300} key={snapshotId}>
-              <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3"/>
-                <XAxis dataKey="timestamp"/>
-                <YAxis domain={[0, 100]}/>
-                <Tooltip/>
-                <Legend/>
-                <Line
-                    dataKey="value"
-                    name={`Snapshot ${snapshotId}`}
-                    type="monotone"
-                    stroke={`hsl(${(index * 50) % 360}, 70%, 50%)`}
-                    dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-            <div className="text-sm text-gray-600 mt-2">
-              <span className="mr-4">Average: <strong>{average}%</strong></span><br />
-              <span className="mr-4">Min: <strong>{min}%</strong></span><br />
-              <span className="mr-4">Max: <strong>{max}%</strong></span><br />
-            </div>
-          </div>
-      )
-    })
+              return (
+                  <div key={snapshotId}>
+                    <h2 className="text-xl font-semibold mb-2">{title} (Snapshot {snapshotId})</h2>
+                    <div className="w-full h-[300px] min-w-0">
+                        <ResponsiveContainer width="95%" height="100%">
+                          <LineChart data={data}>
+                            <CartesianGrid strokeDasharray="3 3"/>
+                            <XAxis dataKey="timestamp"/>
+                            <YAxis domain={[0, 100]}/>
+                            <Tooltip/>
+                            <Legend/>
+                            <Line
+                                dataKey="value"
+                                name={`Snapshot ${snapshotId}`}
+                                type="monotone"
+                                stroke={`hsl(${(index * 50) % 360}, 70%, 50%)`}
+                                dot={false}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="text-sm text-gray-600 mt-2">
+                      <span className="mr-4">Average: <strong>{average}%</strong></span><br />
+                      <span className="mr-4">Min: <strong>{min}%</strong></span><br />
+                      <span className="mr-4">Max: <strong>{max}%</strong></span><br />
+                    </div>
+                  </div>
+              )
+            })}
+      </div>
+    )
   }
 
   return (
-    <div className="p-6">
+    <div className="w-full min-w-0">
       <h1 className="text-2xl font-bold mb-6">Metrics Dashboard</h1>
 
       <div className="mb-6">
