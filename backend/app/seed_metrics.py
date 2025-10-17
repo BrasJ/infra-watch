@@ -38,6 +38,10 @@ def seed_fresh_data():
             host = db.query(Host).filter(Host.id == host_id).first()
             if not host:
                 host = Host(id=host_id, hostname=f"host-{host_id}")
+                hostname = f"host-{host_id}",
+                ip_address = f"192.168.1.{host_id}",
+                os = random.choice(["Ubuntu", "Debian", "CentOS"]),
+                status = random.choice(["active", "inactive"])
                 db.add(host)
                 db.commit()
 

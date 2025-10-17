@@ -36,9 +36,9 @@ export default function Hosts() {
                                 hosts.map(host => (
                                     <tr key={host.id} className="border-t">
                                         <td className="px-4 py-2">{host.hostname}</td>
-                                        <td className="px-4 py-2">{host.ip_address}</td>
-                                        <td className="px-4 py-2">{host.os || '-'}</td>
-                                        <td className="px-4 py-2">{host.status}</td>
+                                        <td className="px-4 py-2">{host.ip_address || 'N/A'}</td>
+                                        <td className="px-4 py-2">{host.os || 'Unknown OS'}</td>
+                                        <td className="px-4 py-2">{host.status || 'Unavailable'}</td>
                                         <td className="px-4 py-2">{new Date(host.created_at).toLocaleString()}</td>
                                     </tr>
                                 ))
@@ -47,17 +47,6 @@ export default function Hosts() {
                             )}
                             </tbody>
                         </table>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {hosts.map((host) => (
-                            <div key={host.id} className="border rounded-lg p-4 shadow">
-                                <h2 className="text-lg font-semibold">{host.hostname}</h2>
-                                <p className="text-sm text-gray-500">{host.ip_address}</p>
-                                <p className="text-sm text-gray-500">{host.os}</p>
-                                <p className="text-sm text-gray-500">{host.status}</p>
-                                <p className="text-xs text-gray-400 mt-2">{new Date(host.created_at).toLocaleString()}</p>
-                            </div>
-                        ))}
                     </div>
                 </>
             )}
