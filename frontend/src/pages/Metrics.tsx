@@ -1,23 +1,17 @@
 import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import {fetchAllMetrics, fetchGroupedMetricsByHost, fetchMetricsBySnapshot, fetchSnapshots} from '../lib/api.ts'
+import { fetchGroupedMetricsByHost, fetchSnapshots} from '../lib/api.ts'
 import type { Metric } from '../types/metric.ts'
 import type { Host } from '../types/host.ts'
-import { format } from 'date-fns'
 
 export default function MetricsDashboard() {
   const [metrics, setMetrics] = useState<Metric[]>([])
-  const [snapshots, setSnapshots] = useState<any[]>([])
-  const [selectedSnapshot, setSelectedSnapshot] = useState<number | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [selectedHost, setSelectedHost] = useState<number | null>(null)
-  const [selectedSnapshots, setSelectedSnapshots] = useState<number[]>([])
   const [hosts, setHosts] = useState<Host[]>([])
+  const [selectedHost, setSelectedHost] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetchSnapshots()
-      .then(setSnapshots)
-      .catch(err => console.error("Failed to load snapshots", err))
+    fetchSnapshots().catch(err => console.error("Failed to load snapshots", err))
   }, [])
 
   useEffect(() => {
@@ -27,22 +21,18 @@ export default function MetricsDashboard() {
     .catch(err => console.error("Failed to load hosts", err))
   }, [])
 
-
   useEffect(() => {
-      if (selectedHost !== null) {
-          setLoading(true)
-          fetchGroupedMetricsByHost(selectedHost)
-              .then(setMetrics)
-              .catch(err => console.error("Failed to load metrics", err))
-              .finally(() => setLoading(false))
-      }
+    if (selectedHost !== null) {
+      setLoading(true)
+      fetchGroupedMetricsByHost(selectedHost)
+        .then(setMetrics)
+        .catch(err => console.error("Failed to load metrics", err))
+        .finally(() => setLoading(false))
+    }
   }, [selectedHost])
 
   const groupByHostMetricForSnapshotLines = (metricName: string) => {
-  const grouped: Record<
-    number,
-    Record<string, Record<string, number>>
-  > = {}
+  const grouped: Record<number, Record<string, Record<string, number>>> = {}
 
   metrics
     .filter(m => m.name === metricName && (selectedHost === null || m.host_id === selectedHost))
@@ -57,9 +47,7 @@ export default function MetricsDashboard() {
       grouped[hostId][minutes][snapshotKey] = m.value
     })
 
-  // Convert each host’s grouped data into chart-compatible arrays
   const chartDataPerHost: Record<number, any[]> = {}
-
   Object.entries(grouped).forEach(([hostId, minuteMap]) => {
     const rows = Object.entries(minuteMap).map(([minutes, snapshotMap]) => ({
       minutes: Number(minutes),
@@ -67,18 +55,16 @@ export default function MetricsDashboard() {
     }))
     chartDataPerHost[Number(hostId)] = rows
   })
-console.log("Grouping metrics:", metrics.filter(m => m.name === metricName));
 
   return chartDataPerHost
 }
 
-
   const renderChart = (title: string, metricName: string) => {
-  const dataByHost = groupByHostMetricForSnapshotLines(metricName)
-  const filteredData =
+    const dataByHost = groupByHostMetricForSnapshotLines(metricName)
+    const filteredData =
       selectedHost && dataByHost[selectedHost]
-      ? { [selectedHost]: dataByHost[selectedHost] }
-      : dataByHost
+        ? { [selectedHost]: dataByHost[selectedHost] }
+        : dataByHost;
 
   if (!filteredData || Object.keys(filteredData).length === 0) {
     return (
@@ -90,7 +76,7 @@ console.log("Grouping metrics:", metrics.filter(m => m.name === metricName));
   }
 
   return Object.entries(filteredData).map(([hostId, chartData]) => {
-      if (!chartData || chartData.length === 0) {
+    if (!chartData || chartData.length === 0) {
       return (
         <div key={hostId} className="mb-6">
           <h2 className="text-xl font-semibold mb-2">
@@ -99,7 +85,7 @@ console.log("Grouping metrics:", metrics.filter(m => m.name === metricName));
           <p className="text-gray-600">No chart data available.</p>
         </div>
       );
-      }
+    }
 
     const snapshotKeys = Object.keys(chartData[0]).filter(key => key !== 'minutes')
 
@@ -113,12 +99,12 @@ console.log("Grouping metrics:", metrics.filter(m => m.name === metricName));
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
-                  dataKey="minutes"
-                  type="number"
-                  domain={[0, 1440]}
-                  ticks={[...Array(25).keys()].map(h => h * 60)}
-                  tickFormatter={(value) => `${String(value / 60).padStart(2, '0')}:00`}
-                  label={{ value: "Time of Day", position: "insideBottomRight", offset: -5 }}
+                dataKey="minutes"
+                type="number"
+                domain={[0, 1440]}
+                ticks={[...Array(25).keys()].map(h => h * 60)}
+                tickFormatter={(value) => `${String(value / 60).padStart(2, '0')}:00`}
+                label={{ value: "Time of Day", position: "insideBottomRight", offset: -5 }}
               />
               <YAxis domain={[0, 100]} />
               <Tooltip />
@@ -156,9 +142,9 @@ console.log("Grouping metrics:", metrics.filter(m => m.name === metricName));
           >
             <option value="">-- Select Host --</option>
               {hosts.map(host => (
-                  <option key={host.id} value={host.id}>
-                      Host {host.id}
-                  </option>
+                <option key={host.id} value={host.id}>
+                  Host {host.id}
+                </option>
               ))}
           </select>
         </div>
