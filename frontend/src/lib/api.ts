@@ -49,16 +49,24 @@ export async function createAlert(payload: {
       return response.data
 }
 
-export async function acknowledgeAlert(alertId: number): Promise<Alert> {
-    const response = await api.put('/alerts/${alertId}', {
-        acknowledged: true,
-    })
-    return response.data
+export async function acknowledgeAlert(id: number) {
+  const response = await fetch(`http://localhost:8000/alerts/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ acknowledged: true }),
+  });
+  if (!response.ok) throw new Error('Failed to acknowledge alert');
+  return await response.json();
 }
 
-export async function deleteAlert(alertId: number): Promise<void> {
-    await api.delete('/alerts/${alertId}')
+
+export async function deleteAlert(id: number) {
+  const response = await fetch(`http://localhost:8000/alerts/${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) throw new Error('Failed to delete alert');
 }
+
 
 export async function fetchSnapshots() {
   const response = await api.get('/snapshots/')

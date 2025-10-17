@@ -20,7 +20,7 @@ export default function Alerts() {
     }
 
     const [newAlert, setNewAlert] = useState({
-        snapshot_id: "",  // You may need to fetch or select this dynamically
+        snapshot_id: "",
         message: "",
         severity: "info",
         type: "system",
@@ -49,7 +49,6 @@ export default function Alerts() {
             };
 
             const created = await createAlert(payload);
-            console.log("Created alert:", created);
 
             // Clear form and refresh table
             setNewAlert({
@@ -121,6 +120,8 @@ export default function Alerts() {
                             <th className="px-4 py-2 text-left">Severity</th>
                             <th className="px-4 py-2 text-left">Type</th>
                             <th className="px-4 py-2 text-left">Ack</th>
+                            <th className="px-4 py-2 text-left">Snapshot</th>
+                            <th className="px-4 py-2 text-left">Host</th>
                             <th className="px-4 py-2 text-left">Created</th>
                             <th className="px-4 py-2 text-left">Actions</th>
                         </tr>
@@ -148,7 +149,23 @@ export default function Alerts() {
                             <td className="px-4 py-2">{alert.severity}</td>
                             <td className="px-4 py-2">{alert.type}</td>
                             <td className="px-4 py-2">{alert.acknowledged ? "Yes" : "No"}</td>
+                            <td className="px-4 py-2">{alert.snapshot_id}</td>
+                            <td className="px-4 py-2">{alert.host_id ?? "-"}</td>
                             <td className="px-4 py-2">{new Date(alert.created_at).toLocaleString()}</td>
+                            <td className="px-4 py-2 space-x-2">
+                              <button
+                                className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 text-sm"
+                                onClick={() => handleAcknowledge(alert.id)}
+                              >
+                                Ack
+                              </button>
+                              <button
+                                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-sm"
+                                onClick={() => handleDelete(alert.id)}
+                              >
+                                Delete
+                              </button>
+                            </td>
                           </tr>
                         )
                       })}

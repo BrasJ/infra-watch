@@ -51,3 +51,7 @@ def delete_alert_endpoint(
         db: Session = Depends(get_db),
 ):
     delete_alert(db, alert_id)
+
+@router.patch("/{alert_id}", response_model=AlertRead)
+def acknowledge_alert(alert_id: int, alert_data: AlertUpdate, db: Session = Depends(get_db)):
+    return update_alert(db, alert_id, alert_data)

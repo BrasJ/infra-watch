@@ -4,13 +4,24 @@ from sqlalchemy import select, and_, true
 from fastapi import HTTPException
 
 from app.db.models.alert import Alert
+from app.db.models.snapshot import Snapshot
 from app.schemas.alert import AlertFilter, AlertUpdate, AlertCreate, AlertRead, AlertSeverity
 
 def create_alert(
     db: Session,
     alert_data: AlertCreate
 ) -> Alert:
-    alert = Alert(**alert_data.model_dump())
+    snapshot = db.query(Snapshot).filter(Snapshot.id == alert_data.snapshot_id).first()
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Snapshot not found")
+    alert = Alert(
+        message=alert_data.message,
+        severity=alert_data.severity,
+        type=alert_data.type,
+        acknowledged=alert_data.acknowledged,
+        snapshot_id=alert_data.snapshot_id,
+        host_id=snapshot.host_id,
+    )
     db.add(alert)
     db.commit()
     db.refresh(alert)

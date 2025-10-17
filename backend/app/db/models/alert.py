@@ -16,3 +16,5 @@ class Alert(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     snapshot = relationship("Snapshot", back_populates="alerts")
+    host_id = Column(Integer, ForeignKey("hosts.id"))
+    host = relationship("Host")
