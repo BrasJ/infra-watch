@@ -45,21 +45,11 @@ def delete_metric(db: Session, metric_id: int) -> None:
     db.delete(metric)
     db.commit()
 
-def list_metrics_with_hosts(db: Session) -> List[dict]:
-    results = (
-        db.query(Metric, Snapshot.host_id)
-        .join(Snapshot, Metric.snapshot_id == Snapshot.id)
+def list_metrics_with_hosts(db: Session, host_id: int) -> List[Metric]:
+    return (
+        db.query(Metric)
+        .filter(Metric.host_id == host_id)
+        .order_by(Metric.snapshot_id, Metric.created_at)
         .all()
     )
 
-    return [
-        {
-            "id": metric.id,
-            "name": metric.name,
-            "value": metric.value,
-            "created_at": metric.created_at,
-            "snapshot_id": metric.snapshot_id,
-            "host_id": host_id,
-        }
-        for metric, host_id in results
-    ]

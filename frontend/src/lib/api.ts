@@ -70,8 +70,7 @@ export async function fetchMetricsBySnapshot(snapshotId: number) {
   return res.data;
 }
 
-export async function fetchGroupedMetricsByHost(): Promise<Metric[]> {
-  const res = await fetch("http://localhost:8000/metrics/grouped/host")
-  if (!res.ok) throw new Error("Failed to fetch grouped metrics")
+export async function fetchGroupedMetricsByHost(hostId: number){
+  const res = await fetch(`http://localhost:8000/metrics/grouped/host/${hostId}`)
   return res.json()
 }

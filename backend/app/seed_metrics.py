@@ -3,51 +3,77 @@ from datetime import datetime, timedelta
 
 from app.db.session import SessionLocal
 from app.db.models.metric import Metric
+from app.db.models.snapshot import Snapshot
+from app.db.models.host import Host
 
-# Configuration
-HOST_ID = 5
-SNAPSHOT_IDS = [1, 2, 3, 4]
+# Settings
+HOST_IDS = [5, 6, 7, 8]
+SNAPSHOT_COUNT = 4
+METRICS_PER_TYPE = 100
 METRIC_NAMES = ['cpu_usage', 'memory_usage', 'disk_usage']
-BASE_TIME = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+VALUE_RANGES = {
+    'cpu_usage': (20, 95),
+    'memory_usage': (10, 90),
+    'disk_usage': (5, 85),
+}
 
-# Utility to generate a random metric value
-def generate_value(metric_name):
-    if metric_name == 'cpu_usage':
-        return round(random.uniform(30, 95), 2)
-    elif metric_name == 'memory_usage':
-        return round(random.uniform(20, 90), 2)
-    elif metric_name == 'disk_usage':
-        return round(random.uniform(10, 80), 2)
-    return 0.0
+def generate_aligned_timestamps(base_day: datetime, count: int) -> list[datetime]:
+    return sorted([
+        base_day + timedelta(minutes=random.randint(0, 1439))
+        for _ in range(count)
+    ])
 
-def seed_metrics():
+def generate_value(metric_name: str) -> float:
+    low, high = VALUE_RANGES.get(metric_name, (0, 100))
+    return round(random.uniform(low, high), 2)
+
+def seed_fresh_data():
     db = SessionLocal()
+    base_date = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
 
     try:
-        # Each snapshot will get 24 metric entries spaced by 1 hour
-        for snapshot_id in SNAPSHOT_IDS:
-            for hour_offset in range(0, 24):
-                timestamp = BASE_TIME + timedelta(hours=hour_offset)
+        for host_id in HOST_IDS:
+            print(f"🔧 Seeding Host {host_id}...")
+            # Ensure host exists
+            host = db.query(Host).filter(Host.id == host_id).first()
+            if not host:
+                host = Host(id=host_id, hostname=f"host-{host_id}")
+                db.add(host)
+                db.commit()
 
-                for metric_name in METRIC_NAMES:
-                    metric = Metric(
-                        name=metric_name,
-                        value=generate_value(metric_name),
-                        snapshot_id=snapshot_id,
-                        host_id=HOST_ID,
-                        created_at=timestamp
-                    )
-                    db.add(metric)
+            # Generate aligned timestamps once per host
+            aligned_times = generate_aligned_timestamps(base_date, METRICS_PER_TYPE)
 
-        db.commit()
-        print("✅ Seeded 24 metrics per snapshot:", SNAPSHOT_IDS)
+            for _ in range(SNAPSHOT_COUNT):
+                snapshot_time = base_date + timedelta(minutes=random.randint(0, 1439))
+                snapshot = Snapshot(host_id=host_id, created_at=snapshot_time)
+                db.add(snapshot)
+                db.commit()  # Needed for snapshot.id
+
+                rows = []
+                for ts in aligned_times:
+                    for name in METRIC_NAMES:
+                        metric = Metric(
+                            name=name,
+                            value=generate_value(name),
+                            snapshot_id=snapshot.id,
+                            host_id=host_id,
+                            created_at=ts
+                        )
+                        rows.append(metric)
+
+                db.bulk_save_objects(rows)
+                db.commit()
+                print(f"✅ Snapshot {snapshot.id} for Host {host_id}")
+
+        print("🎉 Seeding complete.")
 
     except Exception as e:
         db.rollback()
-        print("❌ Error seeding metrics:", e)
+        print("❌ Error during seeding:", e)
 
     finally:
         db.close()
 
 if __name__ == "__main__":
-    seed_metrics()
+    seed_fresh_data()

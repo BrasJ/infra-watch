@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import {fetchAllMetrics, fetchGroupedMetricsByHost, fetchMetricsBySnapshot, fetchSnapshots} from '../lib/api.ts'
 import type { Metric } from '../types/metric.ts'
+import type { Host } from '../types/host.ts'
 import { format } from 'date-fns'
 
 export default function MetricsDashboard() {
@@ -11,6 +12,7 @@ export default function MetricsDashboard() {
   const [loading, setLoading] = useState(false)
   const [selectedHost, setSelectedHost] = useState<number | null>(null)
   const [selectedSnapshots, setSelectedSnapshots] = useState<number[]>([])
+  const [hosts, setHosts] = useState<Host[]>([])
 
   useEffect(() => {
     fetchSnapshots()
@@ -19,15 +21,22 @@ export default function MetricsDashboard() {
   }, [])
 
   useEffect(() => {
-      setLoading(true)
-      fetchGroupedMetricsByHost()
-        .then((data) => {
-            console.log("Fetched metrics:", data)
-            setMetrics(data)
-        })
-        .catch(err => console.error("Failed to load metrics", err))
-        .finally(() => setLoading(false))
+  fetch('http://localhost:8000/hosts')
+    .then(res => res.json())
+    .then(setHosts)
+    .catch(err => console.error("Failed to load hosts", err))
   }, [])
+
+
+  useEffect(() => {
+      if (selectedHost !== null) {
+          setLoading(true)
+          fetchGroupedMetricsByHost(selectedHost)
+              .then(setMetrics)
+              .catch(err => console.error("Failed to load metrics", err))
+              .finally(() => setLoading(false))
+      }
+  }, [selectedHost])
 
   const groupByHostMetricForSnapshotLines = (metricName: string) => {
   const grouped: Record<
@@ -36,7 +45,7 @@ export default function MetricsDashboard() {
   > = {}
 
   metrics
-    .filter(m => m.name === metricName)
+    .filter(m => m.name === metricName && (selectedHost === null || m.host_id === selectedHost))
     .forEach(m => {
       const hostId = m.host_id
       const date = new Date(m.created_at)
@@ -58,6 +67,7 @@ export default function MetricsDashboard() {
     }))
     chartDataPerHost[Number(hostId)] = rows
   })
+console.log("Grouping metrics:", metrics.filter(m => m.name === metricName));
 
   return chartDataPerHost
 }
@@ -65,11 +75,33 @@ export default function MetricsDashboard() {
 
   const renderChart = (title: string, metricName: string) => {
   const dataByHost = groupByHostMetricForSnapshotLines(metricName)
+  const filteredData =
+      selectedHost && dataByHost[selectedHost]
+      ? { [selectedHost]: dataByHost[selectedHost] }
+      : dataByHost
 
-  return Object.entries(dataByHost).map(([hostId, chartData]) => {
-    const snapshotKeys = Object.keys(chartData[0] || {}).filter(key => key !== 'minutes')
-      console.log("Snapshot keys:", snapshotKeys)
-      console.log("Chart data:", chartData)
+  if (!filteredData || Object.keys(filteredData).length === 0) {
+    return (
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">{title}</h2>
+        <p className="text-gray-600">No data available for this metric.</p>
+      </div>
+    );
+  }
+
+  return Object.entries(filteredData).map(([hostId, chartData]) => {
+      if (!chartData || chartData.length === 0) {
+      return (
+        <div key={hostId} className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">
+            {title} — Host {hostId}
+          </h2>
+          <p className="text-gray-600">No chart data available.</p>
+        </div>
+      );
+      }
+
+    const snapshotKeys = Object.keys(chartData[0]).filter(key => key !== 'minutes')
 
     return (
       <div key={hostId} className="mb-12">
@@ -111,18 +143,32 @@ export default function MetricsDashboard() {
 
   return (
     <div className="w-full min-w-0">
-      <h1 className="text-2xl font-bold mb-6">Metrics Dashboard</h1>
-      {loading ? (
-        <p>Loading metrics...</p>
-      ) : metrics.length > 0 ? (
+        <h1 className="text-2xl font-bold mb-4">Metrics Dashboard</h1>
+        <div className="mb-6">
+          <label className="block font-semibold mb-1">Select Host:</label>
+          <select
+            className="border p-2 rounded"
+            value={selectedHost ?? ''}
+            onChange={(e) => {
+              const value = Number(e.target.value)
+              setSelectedHost(isNaN(value) ? null : value)
+            }}
+          >
+            <option value="">-- Select Host --</option>
+              {hosts.map(host => (
+                  <option key={host.id} value={host.id}>
+                      Host {host.id}
+                  </option>
+              ))}
+          </select>
+        </div>
+      {selectedHost && (
         <>
             {renderChart('CPU Usage (%)', 'cpu_usage')}
             {renderChart('Memory Usage (%)', 'memory_usage')}
             {renderChart('Disk Usage (%)', 'disk_usage')}
         </>
-      ) : (
-        <p>No metrics found.</p>
-    )}
+      )}
     </div>
   )
 }

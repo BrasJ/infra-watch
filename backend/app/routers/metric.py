@@ -9,7 +9,8 @@ from app.services.metric import (
     get_metric_by_id,
     delete_metric,
     get_latest_metric_for_host,
-    list_metrics
+    list_metrics,
+    list_metrics_with_hosts
 )
 from app.db.session import get_db
 
@@ -60,9 +61,9 @@ def remove_metric(
     delete_metric(db, metric_id)
     return
 
-@router.get("/grouped/host", response_model=List[MetricGroupedByHost])
+@router.get("/grouped/host/{host_id}", response_model=List[MetricGroupedByHost])
 def get_metrics_grouped_by_host(
+    host_id: int,
     db: Session = Depends(get_db)
 ):
-    from app.services.metric import list_metrics_with_hosts
-    return list_metrics_with_hosts(db)
+    return list_metrics_with_hosts(db, host_id)
