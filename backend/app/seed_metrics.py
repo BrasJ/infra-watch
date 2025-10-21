@@ -5,6 +5,7 @@ from app.db.session import SessionLocal
 from app.db.models.metric import Metric
 from app.db.models.snapshot import Snapshot
 from app.db.models.host import Host
+from app.services.alert_rule import evaluate_rules_and_generate_alerts
 
 # Settings
 HOST_IDS = [5, 6, 7, 8]
@@ -81,3 +82,14 @@ def seed_fresh_data():
 
 if __name__ == "__main__":
     seed_fresh_data()
+
+    # Run rule evaluation after seeding
+    db = SessionLocal()
+    try:
+        # Assuming you have snapshot IDs available
+        snapshot_ids = [s.id for s in db.execute("SELECT id FROM snapshots").fetchall()]
+        for sid in snapshot_ids:
+            evaluate_rules_and_generate_alerts(db, sid)
+        print("✅ Evaluated alert rules for all seeded snapshots.")
+    finally:
+        db.close()
