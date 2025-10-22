@@ -15,3 +15,4 @@ class Host(Base):
     snapshots = relationship('Snapshot', back_populates='host', cascade="all, delete-orphan")
     created_at = Column(DateTime, default=lambda: datetime.now(UTC))
     metrics = relationship('Metric', back_populates='host')
+    alert_rules = relationship('AlertRule', back_populates='host')

@@ -5,7 +5,7 @@ from app.db.models.alert_rule import AlertRule
 from app.db.models.metric import Metric
 from app.db.models.alert import Alert
 from app.schemas.alert_rule import AlertRuleCreate, AlertRuleUpdate
-from app.scheams.alert import AlertSeverity
+from app.schemas.alert import AlertSeverity
 
 def create_alert_rule(db: Session, rule_data: AlertRuleCreate) -> AlertRule:
     rule = AlertRule(**rule_data.model_dump())

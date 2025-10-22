@@ -1,13 +1,15 @@
 import random
 from datetime import datetime, timedelta
+from sqlalchemy import text
 
 from app.db.session import SessionLocal
 from app.db.models.metric import Metric
 from app.db.models.snapshot import Snapshot
 from app.db.models.host import Host
+from app.db.models.alert_rule import AlertRule
 from app.services.alert_rule import evaluate_rules_and_generate_alerts
+from app.schemas.alert import AlertSeverity
 
-# Settings
 HOST_IDS = [5, 6, 7, 8]
 SNAPSHOT_COUNT = 4
 METRICS_PER_TYPE = 100
@@ -80,14 +82,64 @@ def seed_fresh_data():
     finally:
         db.close()
 
+def seed_alert_rules():
+    db = SessionLocal()
+    rules = [
+        AlertRule(
+            host_id=None,
+            metric_name="cpu_usage",
+            operator=">",
+            threshold=80.0,
+            severity=AlertSeverity.critical,
+            message="High CPU usage detected",
+            enabled=True
+        ),
+        AlertRule(
+            host_id=None,
+            metric_name="memory_usage",
+            operator=">",
+            threshold=75.0,
+            severity=AlertSeverity.warning,
+            message="Elevated memory usage",
+            enabled=True
+        ),
+        AlertRule(
+            host_id=None,
+            metric_name="disk_usage",
+            operator=">",
+            threshold=85.0,
+            severity=AlertSeverity.critical,
+            message="Disk usage critically high",
+            enabled=True
+        ),
+        AlertRule(
+            host_id=None,
+            metric_name="cpu_usage",
+            operator="<",
+            threshold=10.0,
+            severity=AlertSeverity.info,
+            message="CPU usage abnormally low",
+            enabled=True
+        ),
+    ]
+
+    try:
+        db.bulk_save_objects(rules)
+        db.commit()
+        print("✅ Default alert rules seeded.")
+    except Exception as e:
+        db.rollback()
+        print("❌ Error seeding alert rules:", e)
+    finally:
+        db.close()
+
 if __name__ == "__main__":
     seed_fresh_data()
+    seed_alert_rules()
 
-    # Run rule evaluation after seeding
     db = SessionLocal()
     try:
-        # Assuming you have snapshot IDs available
-        snapshot_ids = [s.id for s in db.execute("SELECT id FROM snapshots").fetchall()]
+        snapshot_ids = [row[0] for row in db.execute(text("SELECT id FROM snapshots")).fetchall()]
         for sid in snapshot_ids:
             evaluate_rules_and_generate_alerts(db, sid)
         print("✅ Evaluated alert rules for all seeded snapshots.")
