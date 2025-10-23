@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { fetchDashboardStats, fetchRecentAlerts, fetchAlertTrends, fetchMetricInsights } from '../lib/api'
 import type { Alert, HostMetrics } from '../types'
-import AlertTrendChart from '../components/AlertTrendChart'
-import MetricBarChart from '../components/MetricBarChart'
+import AlertTrendChart from '../components/charts/AlertTrendChart'
+import MetricBarChart from '../components/charts/MetricBarChart'
 
 export default function DashboardOverview() {
   const [stats, setStats] = useState({
