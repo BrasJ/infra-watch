@@ -3,6 +3,7 @@ import { fetchDashboardStats, fetchRecentAlerts, fetchAlertTrends, fetchMetricIn
 import type { Alert, HostMetrics } from '../types'
 import AlertTrendChart from '../components/charts/AlertTrendChart'
 import MetricBarChart from '../components/charts/MetricBarChart'
+import SystemStatsRow from '../components/dashboard/SystemStatsRow'
 
 export default function DashboardOverview() {
   const [stats, setStats] = useState({
@@ -40,6 +41,7 @@ export default function DashboardOverview() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">System Overview</h1>
+      <SystemStatsRow />
 
       {/* High Level Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -93,10 +95,10 @@ export default function DashboardOverview() {
       {/* Insights Panel */}
       <div>
         <h2 className="text-lg font-bold mb-4">Insights</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <MetricBarChart data={metricInsights} metric="cpu_usage" title="CPU Usage (Avg vs Max)" />
-          <MetricBarChart data={metricInsights} metric="memory_usage" title="Memory Usage (Avg vs Max)" />
-          <MetricBarChart data={metricInsights} metric="disk_usage" title="Disk Usage (Avg vs Max)" />
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <MetricBarChart metricName="cpu_usage" title="CPU Usage (24h)" />
+            <MetricBarChart metricName="memory_usage" title="Memory Usage (24h)" />
+            <MetricBarChart metricName="disk_usage" title="Disk Usage (24h)" />
         </div>
       </div>
     </div>
