@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts"
-import { fetchMetrics } from "../../lib/api"
+import { fetchAllMetrics } from "../../lib/api"
 import type { Metric } from "../../types/metric"
 
 interface HostMetricAggregate {
@@ -36,7 +36,7 @@ export default function MetricBarChart({ metricName, title }: MetricBarChartProp
   useEffect(() => {
     async function load() {
       try {
-        const raw: Metric[] = await fetchMetrics()
+        const raw: Metric[] = await fetchAllMetrics()
         const now = new Date()
         const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 

@@ -82,3 +82,23 @@ export async function fetchGroupedMetricsByHost(hostId: number){
   const res = await fetch(`http://localhost:8000/metrics/grouped/host/${hostId}`)
   return res.json()
 }
+
+export async function fetchDashboardStats() {
+  const response = await api.get('/dashboard/stats')
+  return response.data
+}
+
+export async function fetchRecentAlerts() {
+  const response = await api.get('/dashboard/alerts/recent')
+  return response.data
+}
+
+export async function fetchAlertTrends() {
+  const response = await api.get('/dashboard/alerts/trends')
+  return response.data
+}
+
+export async function fetchMetricInsights() {
+  const response = await api.get('/dashboard/metrics/insights')
+  return response.data
+}

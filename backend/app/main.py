@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import host, metric, snapshot, alert, alert_rules
+from app.routers import host, metric, snapshot, alert, alert_rules, dashboard
 from app.api import snapshot, alerts, auth
 
 app = FastAPI(
@@ -29,6 +29,7 @@ app.include_router(metric.router)
 app.include_router(snapshot.router)
 app.include_router(alert.router)
 app.include_router(alert_rules.router)
+app.include_router(dashboard.router)
 app.include_router(auth.router)
 
 @app.get("/ping")

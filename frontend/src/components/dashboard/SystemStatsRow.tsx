@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { fetchHosts, fetchSnapshots, fetchMetrics } from "../../lib/api"
+import { fetchHosts, fetchSnapshots, fetchAllMetrics } from "../../lib/api"
 import type { Host } from "../../types/host"
 import type { Snapshot } from "../../types/snapshot"
 import type { Metric } from "../../types/metric"
@@ -18,7 +18,7 @@ export default function SystemStatsRow() {
         const [hosts, snapshots, metrics]: [Host[], Snapshot[], Metric[]] = await Promise.all([
           fetchHosts(),
           fetchSnapshots(),
-          fetchMetrics(),
+          fetchAllMetrics(),
         ])
 
         setHostCount(hosts.length)
