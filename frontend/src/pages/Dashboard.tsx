@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchDashboardStats, fetchRecentAlerts } from '../lib/api'
 import type { Alert } from '../types/alert'
 import MetricBarChart from '../components/charts/MetricBarChart'
+import usePageMetadata from '../hooks/usePageMetadata';
 
 export default function DashboardOverview() {
   const [stats, setStats] = useState({
@@ -10,6 +11,11 @@ export default function DashboardOverview() {
     metricsLast24h: 0,
   })
   const [recentAlerts, setRecentAlerts] = useState<Alert[]>([])
+
+  usePageMetadata(
+    'Infra-Watch | Dashboard',
+    'View live system summaries, metrics, and alert activity.'
+  );
 
   useEffect(() => {
     async function loadDashboard() {

@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react'
 import type { Host } from '../types/host.ts'
 import { fetchHosts } from '../lib/api.ts'
+import usePageMetadata from '../hooks/usePageMetadata';
 
 export default function Hosts() {
     const [hosts, setHosts] = useState<Host[]>([])
     const [loading, setLoading] = useState(true)
+
+    usePageMetadata(
+      'Infra-Watch | Hosts',
+      'Monitor connected hosts and check their operational status.'
+    );
 
     useEffect(() => {
         fetchHosts()
