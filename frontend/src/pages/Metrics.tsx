@@ -18,10 +18,6 @@ export default function MetricsDashboard() {
   )
 
   useEffect(() => {
-    fetchSnapshots().catch(err => console.error("Failed to load snapshots", err))
-  }, [])
-
-  useEffect(() => {
     setError(null)
     fetchHosts()
       .then(setHosts)

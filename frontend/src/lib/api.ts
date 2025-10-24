@@ -30,11 +30,6 @@ export async function fetchGroupedMetricsByHost(hostId: number) {
   return res.data;
 }
 
-export async function fetchSnapshots() {
-  const res = await api.get("/snapshots/");
-  return res.data;
-}
-
 export async function fetchAlerts(filters: {
   severity?: string;
   acknowledged?: boolean;
