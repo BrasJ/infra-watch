@@ -3,9 +3,10 @@ import type { Metric } from '../types/metric.ts';
 import type { Alert } from '../types/alert.ts'
 
 const api = axios.create({
-    baseURL: "http://localhost:8000",
-    withCredentials: false,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+  withCredentials: false,
 });
+
 
 export default api
 

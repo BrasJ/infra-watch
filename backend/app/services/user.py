@@ -2,9 +2,9 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from typing import List, Optional
 
-from app.db.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
-from app.services.auth import get_password_hash
+from backend.app.db.models.user import User
+from backend.app.schemas.user import UserCreate, UserUpdate
+from backend.app.services.auth import get_password_hash
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()

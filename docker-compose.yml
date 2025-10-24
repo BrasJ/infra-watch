@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: fastapi-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/code/backend
+      - DATABASE_URL=postgresql://user:password@db:5432/infra_watch
+      - JWT_SECRET=devsecret
+      - FRONTEND_URL=http://localhost:3000
+      - AGENT_AUTH_TOKEN=devtoken
+      - ALERT_EVAL_INTERVAL=30
+    depends_on:
+      - db
+    command: >
+      sh -c "
+              echo '⏳ Waiting for database connection...' &&
+              until pg_isready -h db -p 5432 -U user; do sleep 2; done &&
+              echo '✅ Database is ready.' &&
+              alembic -c /code/backend/alembic.ini upgrade head &&
+              python -m app.seed_metrics &&
+              uvicorn app.main:app --host 0.0.0.0 --port 8000
+            "
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: vite-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    command: >
+      sh -c "until getent hosts backend; do echo 'waiting for backend...'; sleep 2; done &&
+             nginx -g 'daemon off;'"
+
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: infra_watch
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

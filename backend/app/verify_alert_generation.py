@@ -1,4 +1,4 @@
-from app.db.session import SessionLocal
+from backend.app.db.session import SessionLocal
 from sqlalchemy import text
 
 def verify_alerts():

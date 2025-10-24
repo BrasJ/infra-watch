@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.db.session import get_db
-from app.schemas.alert_rule import AlertRuleCreate, AlertRuleUpdate, AlertRuleRead
-from app.services import alert_rule
+from backend.app.db.session import get_db
+from backend.app.schemas.alert_rule import AlertRuleCreate, AlertRuleUpdate, AlertRuleRead
+from backend.app.services import alert_rule
 
 router = APIRouter(prefix="/alert-rules", tags=["Alert Rules"])
 

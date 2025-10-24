@@ -1,14 +1,17 @@
+import os
+import time
 import random
 from datetime import datetime, timedelta
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
 
-from app.db.session import SessionLocal
-from app.db.models.metric import Metric
-from app.db.models.snapshot import Snapshot
-from app.db.models.host import Host
-from app.db.models.alert_rule import AlertRule
-from app.services.alert_rule import evaluate_rules_and_generate_alerts
-from app.schemas.alert import AlertSeverity
+from backend.app.db.session import SessionLocal
+from backend.app.db.models.metric import Metric
+from backend.app.db.models.snapshot import Snapshot
+from backend.app.db.models.host import Host
+from backend.app.db.models.alert_rule import AlertRule
+from backend.app.services.alert_rule import evaluate_rules_and_generate_alerts
+from backend.app.schemas.alert import AlertSeverity
 
 HOST_IDS = [5, 6, 7, 8]
 SNAPSHOT_COUNT = 4
@@ -20,15 +23,34 @@ VALUE_RANGES = {
     'disk_usage': (5, 85),
 }
 
+
+# ✅ 1. Wait for DB to be ready (critical for Docker safety)
+def wait_for_db(max_retries=10, delay=3):
+    print("⏳ Waiting for database connection...")
+    for i in range(max_retries):
+        try:
+            db = SessionLocal()
+            db.execute(text("SELECT 1"))
+            db.close()
+            print("✅ Database is ready.")
+            return
+        except OperationalError as e:
+            print(f"Attempt {i+1}/{max_retries}: Database not ready ({e})")
+            time.sleep(delay)
+    raise RuntimeError("❌ Database not reachable after multiple attempts.")
+
+
 def generate_aligned_timestamps(base_day: datetime, count: int) -> list[datetime]:
     return sorted([
         base_day + timedelta(minutes=random.randint(0, 1439))
         for _ in range(count)
     ])
 
+
 def generate_value(metric_name: str) -> float:
     low, high = VALUE_RANGES.get(metric_name, (0, 100))
     return round(random.uniform(low, high), 2)
+
 
 def seed_fresh_data():
     db = SessionLocal()
@@ -37,25 +59,25 @@ def seed_fresh_data():
     try:
         for host_id in HOST_IDS:
             print(f"🔧 Seeding Host {host_id}...")
-            # Ensure host exists
             host = db.query(Host).filter(Host.id == host_id).first()
             if not host:
-                host = Host(id=host_id, hostname=f"host-{host_id}")
-                hostname = f"host-{host_id}",
-                ip_address = f"192.168.1.{host_id}",
-                os = random.choice(["Ubuntu", "Debian", "CentOS"]),
-                status = random.choice(["active", "inactive"])
+                host = Host(
+                    id=host_id,
+                    hostname=f"host-{host_id}",
+                    ip_address=f"192.168.1.{host_id}",
+                    os=random.choice(["Ubuntu", "Debian", "CentOS"]),
+                    status=random.choice(["active", "inactive"])
+                )
                 db.add(host)
                 db.commit()
 
-            # Generate aligned timestamps once per host
             aligned_times = generate_aligned_timestamps(base_date, METRICS_PER_TYPE)
 
             for _ in range(SNAPSHOT_COUNT):
                 snapshot_time = base_date + timedelta(minutes=random.randint(0, 1439))
                 snapshot = Snapshot(host_id=host_id, created_at=snapshot_time)
                 db.add(snapshot)
-                db.commit()  # Needed for snapshot.id
+                db.commit()
 
                 rows = []
                 for ts in aligned_times:
@@ -81,6 +103,7 @@ def seed_fresh_data():
 
     finally:
         db.close()
+
 
 def seed_alert_rules():
     db = SessionLocal()
@@ -133,7 +156,11 @@ def seed_alert_rules():
     finally:
         db.close()
 
+
 if __name__ == "__main__":
+    # Ensure DB is ready before seeding
+    wait_for_db()
+
     seed_fresh_data()
     seed_alert_rules()
 

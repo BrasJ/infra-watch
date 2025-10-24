@@ -7,4 +7,5 @@ export type Alert = {
     snapshot_id: number
     type: string
     created_at: string
+    host_id: number
 }

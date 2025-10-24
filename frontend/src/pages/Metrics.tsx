@@ -149,12 +149,18 @@ export default function MetricsDashboard() {
           </select>
         </div>
       {selectedHost && (
-        <>
-            {renderChart('CPU Usage (%)', 'cpu_usage')}
-            {renderChart('Memory Usage (%)', 'memory_usage')}
-            {renderChart('Disk Usage (%)', 'disk_usage')}
-        </>
-      )}
+          <>
+            {loading ? (
+              <p className="text-gray-500 mb-4">Loading metrics...</p>
+            ) : (
+              <>
+                {renderChart('CPU Usage (%)', 'cpu_usage')}
+                {renderChart('Memory Usage (%)', 'memory_usage')}
+                {renderChart('Disk Usage (%)', 'disk_usage')}
+              </>
+            )}
+          </>
+        )}
     </div>
   )
 }

@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
-from app.routers import host, metric, snapshot, alert, alert_rules, dashboard
-from app.api import snapshot, alerts, auth
+from backend.app.core.config import settings
+from backend.app.routers import host, metric, snapshot, alert, alert_rules, dashboard
+from backend.app.api import snapshot, alerts, auth
 
 app = FastAPI(
     title="Infra-Watch API",
@@ -13,7 +13,9 @@ app = FastAPI(
 
 origins = [
     "http://localhost:5173",
-    "http://localhost:5174",  # <- Add this!
+    "http://localhost:5174",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 app.add_middleware(

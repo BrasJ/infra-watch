@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, and_, true
 from fastapi import HTTPException
 
-from app.db.models.alert import Alert
-from app.db.models.snapshot import Snapshot
-from app.schemas.alert import AlertFilter, AlertUpdate, AlertCreate, AlertRead, AlertSeverity
+from backend.app.db.models.alert import Alert
+from backend.app.db.models.snapshot import Snapshot
+from backend.app.schemas.alert import AlertFilter, AlertUpdate, AlertCreate, AlertRead, AlertSeverity
 
 def create_alert(
     db: Session,

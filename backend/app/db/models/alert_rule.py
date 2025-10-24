@@ -10,7 +10,7 @@ class AlertRule(Base):
     metric_name = Column(String, nullable=False)
     operator = Column(String, nullable=False)
     threshold = Column(Float, nullable=False)
-    severity = Column(Integer, nullable=False)
+    severity = Column(String, nullable=False)
     message = Column(String, nullable=False)
     enabled = Column(Boolean, nullable=True)
 

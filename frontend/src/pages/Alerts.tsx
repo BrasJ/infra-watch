@@ -19,13 +19,19 @@ export default function Alerts() {
             .finally(() => setLoading(false))
     }
 
-    const [newAlert, setNewAlert] = useState({
-        snapshot_id: "",
-        message: "",
-        severity: "info",
-        type: "system",
-        acknowledged: false
-    })
+    const [newAlert, setNewAlert] = useState<{
+      snapshot_id: string;
+      message: string;
+      severity: "info" | "warning" | "critical";
+      type: string;
+      acknowledged: boolean;
+    }>({
+      snapshot_id: "",
+      message: "",
+      severity: "info",
+      type: "system",
+      acknowledged: false,
+    });
 
     const [snapshots, setSnapshots] = useState<any[]>([])
 
@@ -43,12 +49,18 @@ export default function Alerts() {
     async function handleCreateAlert() {
         try {
             // Convert snapshot_id to a number before sending to backend
+            const validSeverities = ["info", "warning", "critical"] as const;
+            const safeSeverity = validSeverities.includes(newAlert.severity as any)
+              ? (newAlert.severity as "info" | "warning" | "critical")
+              : "info";
+
             const payload = {
               ...newAlert,
               snapshot_id: Number(newAlert.snapshot_id),
+              severity: safeSeverity, // ✅ type‑safe cast
             };
 
-            const created = await createAlert(payload);
+            await createAlert(payload);
 
             // Clear form and refresh table
             setNewAlert({
@@ -202,7 +214,7 @@ export default function Alerts() {
                 <select
                   className="border p-2 rounded"
                   value={newAlert.severity}
-                  onChange={(e) => setNewAlert({ ...newAlert, severity: e.target.value })}
+                  onChange={(e) => setNewAlert({ ...newAlert, severity: e.target.value as "info" | "warning" | "critical" })}
                 >
                   <option value="info">Info</option>
                   <option value="warning">Warning</option>

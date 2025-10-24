@@ -12,13 +12,6 @@ import {
 import { fetchAllMetrics } from "../../lib/api"
 import type { Metric } from "../../types/metric"
 
-interface HostMetricAggregate {
-  host_id: number
-  hostname: string
-  avg: number
-  max: number
-}
-
 interface ChartEntry {
   name: string
   avg: number
@@ -51,7 +44,7 @@ export default function MetricBarChart({ metricName, title }: MetricBarChartProp
         }
 
         const entries: ChartEntry[] = Object.entries(grouped).map(([hostId, metrics]) => {
-          const hostName = metrics[0].hostname || `Host ${hostId}`
+          const hostName = metrics[0].name || `Host ${hostId}`
           const values = metrics.map(m => m.value)
           const avg = values.reduce((a, b) => a + b, 0) / values.length
           const max = Math.max(...values)

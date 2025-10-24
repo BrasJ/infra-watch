@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { fetchDashboardStats, fetchRecentAlerts, fetchAlertTrends, fetchMetricInsights } from '../lib/api'
-import type { Alert, HostMetrics } from '../types'
+import { fetchDashboardStats, fetchRecentAlerts } from '../lib/api'
+import type { Alert } from '../types/alert'
 import MetricBarChart from '../components/charts/MetricBarChart'
 
 export default function DashboardOverview() {
@@ -10,31 +10,23 @@ export default function DashboardOverview() {
     metricsLast24h: 0,
   })
   const [recentAlerts, setRecentAlerts] = useState<Alert[]>([])
-  const [alertTrends, setAlertTrends] = useState<any[]>([])
-  const [metricInsights, setMetricInsights] = useState<HostMetrics[]>([])
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function loadDashboard() {
       try {
-        const [summary, alerts, trends, insights] = await Promise.all([
+        const [summary, alerts] = await Promise.all([
           fetchDashboardStats(),
           fetchRecentAlerts(),
-          fetchAlertTrends(),
-          fetchMetricInsights(),
         ])
-        setStats(summary)
-        setRecentAlerts(alerts)
-        setAlertTrends(trends)
-        setMetricInsights(insights)
-      } catch (err) {
-        console.error("Error loading dashboard:", err)
-      } finally {
-        setLoading(false)
+          setStats(summary)
+          setRecentAlerts(alerts)
+        } catch (err) {
+          console.error("Error loading dashboard:", err)
+        }
       }
-    }
     loadDashboard()
   }, [])
+
 
   return (
     <div className="w-full min-w-0 p-6">

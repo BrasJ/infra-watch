@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from app.db.models.host import Host
-from app.db.models.snapshot import Snapshot
-from app.db.models.metric import Metric
-from app.db.models.alert import Alert
-from app.schemas.dashboard import DashboardStats, DashboardAlert, AlertTrendEntry, MetricInsight
+from backend.app.db.models.host import Host
+from backend.app.db.models.snapshot import Snapshot
+from backend.app.db.models.metric import Metric
+from backend.app.db.models.alert import Alert
+from backend.app.schemas.dashboard import DashboardStats, DashboardAlert, AlertTrendEntry, MetricInsight
 
 def get_dashboard_stats(db: Session) -> DashboardStats:
     now = datetime.utcnow()
