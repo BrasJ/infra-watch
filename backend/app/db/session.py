@@ -1,9 +1,17 @@
-import os
+import sys, os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import OperationalError
 
-from app.core.config import settings
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(os.path.dirname(BASE_DIR))
+if PARENT_DIR not in sys.path:
+    sys.path.append(PARENT_DIR)
+
+try:
+    from app.core.config import settings   # local
+except ModuleNotFoundError:
+    from backend.app.core.config import settings  # render
 
 database_url = os.getenv("DATABASE_URL", settings.database_url)
 
@@ -13,7 +21,6 @@ if database_url and database_url.startswith("postgres://"):
 try:
     engine = create_engine(
         database_url,
-        pool_pre_ping=True,     # Helps with dropped connections (AWS RDS, etc.)
         future=True,
         echo=False
     )
