@@ -14,4 +14,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /code/backend
 
 EXPOSE 8000
-CMD ["sh", "-c", "alembic -c /code/backend/alembic.ini upgrade head && python -m app.seed_metrics && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "/code/backend/start.sh"]
+
