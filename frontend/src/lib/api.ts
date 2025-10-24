@@ -30,6 +30,16 @@ export async function fetchGroupedMetricsByHost(hostId: number) {
   return res.data;
 }
 
+export async function fetchSnapshots() {
+  try {
+    const response = await api.get('/snapshots/');
+    return response.data;
+  } catch (err: any) {
+    console.error("Failed to fetch snapshots:", err);
+    throw err;
+  }
+}
+
 export async function fetchAlerts(filters: {
   severity?: string;
   acknowledged?: boolean;

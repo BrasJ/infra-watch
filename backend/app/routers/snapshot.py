@@ -10,34 +10,39 @@ from app.services.snapshot import (
     delete_snapshot
 )
 from app.db.session import get_db
+from app.db.models.snapshot import Snapshot
 
 router = APIRouter(prefix="/snapshots", tags=["snapshots"])
 
 @router.post("/", response_model=SnapshotRead)
 def register_snapshot(
-        snapshot: SnapshotCreate,
-        db: Session = Depends(get_db)
+    snapshot: SnapshotCreate,
+    db: Session = Depends(get_db)
 ):
     return create_snapshot(db, snapshot)
 
 @router.get("/{snapshot_id}", response_model=SnapshotRead)
 def retrieve_snapshot(
-        snapshot_id: int,
-        db: Session = Depends(get_db)
+    snapshot_id: int,
+    db: Session = Depends(get_db)
 ):
     return get_snapshot(db, snapshot_id)
 
 @router.get("/hosts/{host_id}", response_model=List[SnapshotRead])
 def list_host_snapshots(
-        host_id: int,
-        db: Session = Depends(get_db)
+    host_id: int,
+    db: Session = Depends(get_db)
 ):
     return list_snapshots(db, host_id)
 
+@router.get("/", response_model=List[SnapshotRead])
+def list_all_snapshots(db: Session = Depends(get_db)):
+    return db.query(Snapshot).order_by(Snapshot.created_at.desc()).all()
+
 @router.delete("/{snapshot_id}", status_code=204)
 def remove_snapshot(
-        snapshot_id: int,
-        db: Session = Depends(get_db)
+    snapshot_id: int,
+    db: Session = Depends(get_db)
 ):
     delete_snapshot(db, snapshot_id)
     return
