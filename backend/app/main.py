@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import asyncio
 import logging
+from pathlib import Path
 from alembic import command
 from alembic.config import Config
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,7 +41,9 @@ async def on_startup():
 
     try:
         logging.info("🔧 Applying Alembic migrations...")
-        alembic_cfg = Config("alembic.ini")
+        alembic_path = Path(__file__).resolve().parent.parent / "alembic.ini"
+        alembic_cfg = Config(str(alembic_path))
+        alembic_cfg.set_main_option("script_location", str(Path(__file__).resolve().parent.parent / "alembic"))
         command.upgrade(alembic_cfg, "head")
         logging.info("✅ Database schema up to date.")
     except Exception as e:
