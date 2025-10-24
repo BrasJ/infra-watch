@@ -4,11 +4,27 @@ import logging
 from alembic import command
 from alembic.config import Config
 from fastapi.middleware.cors import CORSMiddleware
-from app.db.session import engine
-from app.core.config import settings
-from app.routers import host, metric, snapshot, alert, alert_rules, dashboard
-from app.api import snapshot, alerts, auth
-from app.seed_metrics import seed_if_needed
+import sys, os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(os.path.dirname(BASE_DIR))
+if PARENT_DIR not in sys.path:
+    sys.path.append(PARENT_DIR)
+
+try:
+    # ✅ Local (run from project root)
+    from app.db.session import engine
+    from app.core.config import settings
+    from app.routers import host, metric, snapshot, alert, alert_rules, dashboard
+    from app.api import snapshot as api_snapshot, alerts, auth
+    from app.seed_metrics import seed_if_needed
+except ModuleNotFoundError:
+    # ✅ Render (root directory is /backend)
+    from backend.app.db.session import engine
+    from backend.app.core.config import settings
+    from backend.app.routers import host, metric, snapshot, alert, alert_rules, dashboard
+    from backend.app.api import snapshot as api_snapshot, alerts, auth
+    from backend.app.seed_metrics import seed_if_needed
 
 app = FastAPI(
     title="Infra-Watch API",
