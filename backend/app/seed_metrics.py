@@ -49,10 +49,11 @@ def wait_for_db(max_retries=10, delay=3):
     raise RuntimeError("❌ Database not reachable after multiple attempts.")
 
 def generate_aligned_timestamps(base_day: datetime, count: int):
-    return sorted([
-        base_day + timedelta(minutes=random.randint(0, 1439))
-        for _ in range(count)
-    ])
+    interval_minutes = int(1440 / count)
+    return [
+        base_day + timedelta(minutes=i * interval_minutes)
+        for i in range(count)
+    ]
 
 def generate_value(metric_name: str) -> float:
     low, high = VALUE_RANGES.get(metric_name, (0, 100))
@@ -78,19 +79,19 @@ def seed_fresh_data():
                 db.add(host)
                 db.commit()
 
-            aligned_times = generate_aligned_timestamps(base_date, METRICS_PER_TYPE)
-
-            # only seed if no snapshots exist for this host
             snapshot_exists = db.query(exists().where(Snapshot.host_id == host_id)).scalar()
             if snapshot_exists:
                 print(f"⏩ Host {host_id} already has snapshots, skipping.")
                 continue
 
-            for _ in range(SNAPSHOT_COUNT):
-                snapshot_time = base_date + timedelta(minutes=random.randint(0, 1439))
+            for snap_index in range(SNAPSHOT_COUNT):
+                snapshot_time = base_date + timedelta(hours=(snap_index * 6))
                 snapshot = Snapshot(host_id=host_id, created_at=snapshot_time)
                 db.add(snapshot)
                 db.commit()
+
+                # Generate uniform timestamps every 15 minutes
+                aligned_times = generate_aligned_timestamps(base_date, 96)  # 96 * 15min = 24h
 
                 rows = []
                 for ts in aligned_times:
@@ -104,9 +105,9 @@ def seed_fresh_data():
                         ))
                 db.bulk_save_objects(rows)
                 db.commit()
-                print(f"✅ Snapshot {snapshot.id} for Host {host_id}")
+                print(f"✅ Snapshot {snapshot.id} for Host {host_id} seeded with continuous data.")
 
-        print("🎉 Data seeding complete (idempotent).")
+        print("🎉 Continuous 24h seeding complete (idempotent).")
 
     except Exception as e:
         db.rollback()
