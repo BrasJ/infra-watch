@@ -24,6 +24,7 @@ except ModuleNotFoundError:
     from backend.app.services.alert_rule import evaluate_rules_and_generate_alerts
     from backend.app.schemas.alert import AlertSeverity
 
+
 HOST_IDS = [5, 6, 7, 8]
 SNAPSHOT_COUNT = 4
 METRICS_PER_TYPE = 100
@@ -33,6 +34,7 @@ VALUE_RANGES = {
     'memory_usage': (10, 90),
     'disk_usage': (5, 85),
 }
+
 
 def wait_for_db(max_retries=10, delay=3):
     print("⏳ Waiting for database connection...")
@@ -48,18 +50,23 @@ def wait_for_db(max_retries=10, delay=3):
             time.sleep(delay)
     raise RuntimeError("❌ Database not reachable after multiple attempts.")
 
-def generate_aligned_timestamps(base_day: datetime, count: int):
-    interval_minutes = int(1440 / count)
+
+def generate_aligned_timestamps(base_day: datetime, count: int, offset_minutes: int = 0):
+    """Generate evenly spaced timestamps across 24h, with a per-snapshot offset."""
+    interval = int(1440 / count)
     return [
-        base_day + timedelta(minutes=i * interval_minutes)
+        base_day + timedelta(minutes=i * interval + offset_minutes)
         for i in range(count)
     ]
+
 
 def generate_value(metric_name: str) -> float:
     low, high = VALUE_RANGES.get(metric_name, (0, 100))
     return round(random.uniform(low, high), 2)
 
+
 def seed_fresh_data():
+    """Creates hosts, snapshots, and metrics with continuous 24h data per snapshot."""
     db = SessionLocal()
     base_date = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
 
@@ -67,6 +74,7 @@ def seed_fresh_data():
         existing_hosts = {h.id for h in db.query(Host.id).all()}
 
         for host_id in HOST_IDS:
+            # Create host if missing
             if host_id not in existing_hosts:
                 print(f"🔧 Creating Host {host_id}...")
                 host = Host(
@@ -74,24 +82,25 @@ def seed_fresh_data():
                     hostname=f"host-{host_id}",
                     ip_address=f"192.168.1.{host_id}",
                     os=random.choice(["Ubuntu", "Debian", "CentOS"]),
-                    status=random.choice(["active", "inactive"])
+                    status="active"
                 )
                 db.add(host)
                 db.commit()
 
-            snapshot_exists = db.query(exists().where(Snapshot.host_id == host_id)).scalar()
-            if snapshot_exists:
+            # If this host already has snapshots, skip reseeding
+            if db.query(exists().where(Snapshot.host_id == host_id)).scalar():
                 print(f"⏩ Host {host_id} already has snapshots, skipping.")
                 continue
 
             for snap_index in range(SNAPSHOT_COUNT):
-                snapshot_time = base_date + timedelta(hours=(snap_index * 6))
+                snapshot_time = base_date + timedelta(hours=snap_index * 6)
                 snapshot = Snapshot(host_id=host_id, created_at=snapshot_time)
                 db.add(snapshot)
                 db.commit()
 
-                # Generate uniform timestamps every 15 minutes
-                aligned_times = generate_aligned_timestamps(base_date, 96)  # 96 * 15min = 24h
+                # Give each snapshot a slight random offset (so lines don't overlap)
+                offset = snap_index * 3  # minutes offset
+                aligned_times = generate_aligned_timestamps(base_date, METRICS_PER_TYPE, offset)
 
                 rows = []
                 for ts in aligned_times:
@@ -103,25 +112,25 @@ def seed_fresh_data():
                             host_id=host_id,
                             created_at=ts
                         ))
+
                 db.bulk_save_objects(rows)
                 db.commit()
-                print(f"✅ Snapshot {snapshot.id} for Host {host_id} seeded with continuous data.")
+                print(f"✅ Snapshot {snapshot.id} for Host {host_id} seeded with continuous 24h metrics.")
 
-        print("🎉 Continuous 24h seeding complete (idempotent).")
+        print("🎉 Continuous seeding complete (idempotent).")
 
     except Exception as e:
         db.rollback()
         print("❌ Error during seeding:", e)
-
     finally:
         db.close()
+
 
 def seed_alert_rules():
     db = SessionLocal()
     try:
-        count = db.query(AlertRule).count()
-        if count > 0:
-            print(f"⏩ {count} alert rules already exist. Skipping.")
+        if db.query(AlertRule).count() > 0:
+            print("⏩ Alert rules already exist, skipping.")
             return
 
         rules = [
@@ -143,6 +152,7 @@ def seed_alert_rules():
     finally:
         db.close()
 
+
 def seed_if_needed():
     db = SessionLocal()
     try:
@@ -152,6 +162,7 @@ def seed_if_needed():
             wait_for_db()
             seed_fresh_data()
             seed_alert_rules()
+
             snapshot_ids = [row[0] for row in db.execute(text("SELECT id FROM snapshots")).fetchall()]
             for sid in snapshot_ids:
                 evaluate_rules_and_generate_alerts(db, sid)
@@ -160,6 +171,7 @@ def seed_if_needed():
             print(f"✅ Database already contains data ({host_count} hosts). Skipping seeding.")
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     wait_for_db()
