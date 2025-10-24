@@ -1,20 +1,24 @@
 import sys, os
+from logging.config import fileConfig
+from sqlalchemy import engine_from_config, pool
+from alembic import context
+
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
 try:
-    from app.core.config import settings  # local
+    from app.core.config import settings
+    from app.db.base import Base
+    from app.db import models
 except ModuleNotFoundError:
-    from backend.app.core.config import settings  # render
+    from backend.app.core.config import settings
+    from backend.app.db.base import Base
+    from backend.app.db import models
 
-from backend.app.db.base import Base
-from backend.app.db.models import host, metric, snapshot, alert, user
-
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
-from alembic import context
-
+# prevent double-registration
+from sqlalchemy import MetaData
+Base.metadata = MetaData()
 
 config = context.config
 fileConfig(config.config_file_name)
