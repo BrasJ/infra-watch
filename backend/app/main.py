@@ -65,11 +65,12 @@ origins = [
     "https://infra-watch.vercel.app",
 ]
 
+from starlette.middleware.cors import ALL_METHODS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=ALL_METHODS,
     allow_headers=["*"],
 )
 
