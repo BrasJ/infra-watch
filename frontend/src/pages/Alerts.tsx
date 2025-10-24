@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchSnapshots, fetchAlerts, acknowledgeAlert, deleteAlert, createAlert } from '../lib/api'
+import { fetchAlerts, acknowledgeAlert, deleteAlert, createAlert } from '../lib/api'
 import type { Alert } from '../types/alert'
 import usePageMetadata from '../hooks/usePageMetadata';
 
@@ -15,8 +15,8 @@ export default function Alerts() {
 
         setLoading(true)
         fetchAlerts(filters)
-            .then(data => setAlerts(data))
-            .catch(err => console.error("Failed to fetch alerts:", err))
+            .then((data: Alert[]) => setAlerts(data))
+            .catch((err: unknown) => console.error(err))
             .finally(() => setLoading(false))
     }
 

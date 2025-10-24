@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { fetchGroupedMetricsByHost, fetchSnapshots, fetchHosts } from '../lib/api.ts'
+import { fetchGroupedMetricsByHost, fetchHosts } from '../lib/api.ts'
 import type { Metric } from '../types/metric.ts'
 import type { Host } from '../types/host.ts'
 import usePageMetadata from '../hooks/usePageMetadata'
