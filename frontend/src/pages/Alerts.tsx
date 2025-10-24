@@ -39,7 +39,7 @@ export default function Alerts() {
       acknowledged: false,
     });
 
-
+    const [snapshots, setSnapshots] = useState<any[]>([])
 
     useEffect(() => {
         loadAlerts()
