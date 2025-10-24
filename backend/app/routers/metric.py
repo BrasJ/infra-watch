@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from backend.app.schemas.metric import MetricCreate, MetricRead, MetricGroupedByHost
-from backend.app.services.metric import (
+from app.schemas.metric import MetricCreate, MetricRead, MetricGroupedByHost
+from app.services.metric import (
     create_metric,
     get_metrics_by_snapshot,
     get_metric_by_id,
@@ -12,7 +12,7 @@ from backend.app.services.metric import (
     list_metrics,
     list_metrics_with_hosts
 )
-from backend.app.db.session import get_db
+from app.db.session import get_db
 
 router = APIRouter(prefix="/metrics", tags=["metrics"])
 

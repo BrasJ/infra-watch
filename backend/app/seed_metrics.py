@@ -1,17 +1,19 @@
-import os
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import time
 import random
 from datetime import datetime, timedelta
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
-from backend.app.db.session import SessionLocal
-from backend.app.db.models.metric import Metric
-from backend.app.db.models.snapshot import Snapshot
-from backend.app.db.models.host import Host
-from backend.app.db.models.alert_rule import AlertRule
-from backend.app.services.alert_rule import evaluate_rules_and_generate_alerts
-from backend.app.schemas.alert import AlertSeverity
+from app.db.session import SessionLocal
+from app.db.models.metric import Metric
+from app.db.models.snapshot import Snapshot
+from app.db.models.host import Host
+from app.db.models.alert_rule import AlertRule
+from app.services.alert_rule import evaluate_rules_and_generate_alerts
+from app.schemas.alert import AlertSeverity
 
 HOST_IDS = [5, 6, 7, 8]
 SNAPSHOT_COUNT = 4
@@ -156,6 +158,24 @@ def seed_alert_rules():
     finally:
         db.close()
 
+def seed_if_needed():
+    """Seeds database only if empty (used on startup)."""
+    db = SessionLocal()
+    try:
+        host_count = db.query(Host).count()
+        if host_count == 0:
+            print("🌱 No existing data found. Seeding fresh data...")
+            wait_for_db()
+            seed_fresh_data()
+            seed_alert_rules()
+            snapshot_ids = [row[0] for row in db.execute(text("SELECT id FROM snapshots")).fetchall()]
+            for sid in snapshot_ids:
+                evaluate_rules_and_generate_alerts(db, sid)
+            print("✅ Evaluated alert rules for all seeded snapshots.")
+        else:
+            print("✅ Database already seeded. Skipping seeding.")
+    finally:
+        db.close()
 
 if __name__ == "__main__":
     # Ensure DB is ready before seeding

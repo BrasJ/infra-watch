@@ -6,11 +6,11 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-from backend.app.db.models.user import User
-from backend.app.schemas.token import TokenData
+from app.db.models.user import User
+from app.schemas.token import TokenData
 
 # Secret key for JWT
-from backend.app.core.config import settings
+from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"

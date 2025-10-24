@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from typing import List, Optional
 
-from backend.app.db.models.snapshot import Snapshot
-from backend.app.schemas.snapshot import SnapshotCreate, SnapshotRead
+from app.db.models.snapshot import Snapshot
+from app.schemas.snapshot import SnapshotCreate, SnapshotRead
 
 def create_snapshot(db: Session, snapshot_data: SnapshotCreate) -> Snapshot:
     snapshot = Snapshot(**snapshot_data.model_dump())

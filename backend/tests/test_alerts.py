@@ -1,6 +1,6 @@
 import uuid
 import pytest
-from backend.app.schemas.alert import AlertSeverity
+from app.schemas.alert import AlertSeverity
 
 @pytest.fixture
 def host_for_alert(client):

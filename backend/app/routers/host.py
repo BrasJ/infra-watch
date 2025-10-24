@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List
 
-from backend.app.schemas.host import HostCreate, HostRead
-from backend.app.services.host import create_host, get_all_hosts, get_host_by_id, update_host, delete_host
-from backend.app.db.session import get_db
+from app.schemas.host import HostCreate, HostRead
+from app.services.host import create_host, get_all_hosts, get_host_by_id, update_host, delete_host
+from app.db.session import get_db
 
 print("Host router loaded")
 

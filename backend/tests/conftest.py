@@ -5,10 +5,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
-from backend.app.db.base import Base
-from backend.app.main import app
-from backend.app.db.session import get_db
-from backend.app.db.models import host, snapshot, metric, alert, user
+from app.db.base import Base
+from app.main import app
+from app.db.session import get_db
+from app.db.models import host, snapshot, metric, alert, user
 
 @pytest.fixture(scope='session')
 def db_file():

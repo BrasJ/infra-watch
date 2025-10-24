@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from typing import List
 from fastapi import HTTPException
 
-from backend.app.db.models.host import Host
-from backend.app.schemas.host import HostCreate
+from app.db.models.host import Host
+from app.schemas.host import HostCreate
 
 def create_host(db: Session, host_data: HostCreate) -> Host:
     db_host = Host(**host_data.model_dump())

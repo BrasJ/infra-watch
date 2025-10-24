@@ -3,9 +3,9 @@ from fastapi import HTTPException
 from typing import List, Optional
 from sqlalchemy import desc
 
-from backend.app.db.models.metric import Metric
-from backend.app.schemas.metric import MetricCreate, MetricRead
-from backend.app.db.models.snapshot import Snapshot
+from app.db.models.metric import Metric
+from app.schemas.metric import MetricCreate, MetricRead
+from app.db.models.snapshot import Snapshot
 
 def create_metric(db: Session, metric_data: MetricCreate) -> Metric:
     metric = Metric(**metric_data.model_dump())

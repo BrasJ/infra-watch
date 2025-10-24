@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import OperationalError
 
-from backend.app.core.config import settings
+from app.core.config import settings
 
 database_url = os.getenv("DATABASE_URL", settings.database_url)
 

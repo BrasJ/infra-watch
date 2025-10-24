@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from backend.app.db.session import get_db
-from backend.app.schemas.alert import AlertCreate, AlertRead, AlertUpdate, AlertFilter, AlertSeverity
-from backend.app.services.alert import (
+from app.db.session import get_db
+from app.schemas.alert import AlertCreate, AlertRead, AlertUpdate, AlertFilter, AlertSeverity
+from app.services.alert import (
     create_alert,
     get_alert,
     list_alerts,

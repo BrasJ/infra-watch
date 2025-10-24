@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from backend.app.db.session import get_db
-from backend.app.schemas.metric import MetricRead
-from backend.app.services.metric import (
+from app.db.session import get_db
+from app.schemas.metric import MetricRead
+from app.services.metric import (
     get_latest_metric_for_host,
     get_metrics_by_snapshot,
     list_metrics
