@@ -60,53 +60,68 @@ export default function MetricsDashboard() {
   }
 
   const renderChart = (title: string, metricName: string) => {
-    const dataBySnapshot = groupByHostMetricForSnapshotLines(metricName)
-    const snapshotKeys = Object.keys(dataBySnapshot)
+  const grouped = groupByHostMetricForSnapshotLines(metricName)
+  const snapshotIds = Object.keys(grouped).map(Number)
 
-    if (snapshotKeys.length === 0) {
-      return (
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">{title}</h2>
-          <p className="text-gray-600">No data available for this metric.</p>
-        </div>
-      )
-    }
-
+  if (snapshotIds.length === 0) {
     return (
-      <div className="mb-12">
+      <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">{title}</h2>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="95%" height="100%">
-            <LineChart>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                type="number"
-                domain={[0, 1440]}
-                ticks={[...Array(25).keys()].map(h => h * 60)}
-                tickFormatter={(v) => `${String(v / 60).padStart(2, '0')}:00`}
-                label={{ value: "Time of Day", position: "insideBottomRight", offset: -5 }}
-              />
-              <YAxis domain={[0, 100]} />
-              <Tooltip />
-              <Legend />
-
-              {snapshotKeys.map((sid, i) => (
-                <Line
-                  key={sid}
-                  data={dataBySnapshot[Number(sid)]}
-                  dataKey="value"
-                  name={`Snapshot ${sid}`}
-                  type="monotone"
-                  stroke={`hsl(${(i * 60) % 360}, 70%, 50%)`}
-                  dot={false}
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <p className="text-gray-600">No data available for this metric.</p>
       </div>
     )
   }
+
+  // ✅ Merge all snapshots into one array for Recharts
+  const mergedData: Record<number, any> = {}
+  snapshotIds.forEach(sid => {
+    grouped[sid].forEach(point => {
+      const minutes = point.minutes
+      if (!mergedData[minutes]) mergedData[minutes] = { minutes }
+      mergedData[minutes][`snapshot_${sid}`] = point.value
+    })
+  })
+
+  const chartData = Object.values(mergedData).sort(
+    (a, b) => (a.minutes as number) - (b.minutes as number)
+  )
+
+  return (
+    <div className="mb-12">
+      <h2 className="text-xl font-semibold mb-2">{title}</h2>
+      <div className="h-[300px]">
+        <ResponsiveContainer width="95%" height="100%">
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="minutes"
+              type="number"
+              domain={[0, 1440]}
+              ticks={[...Array(25).keys()].map(h => h * 60)}
+              tickFormatter={(v) => `${String(v / 60).padStart(2, '0')}:00`}
+              label={{ value: "Time of Day", position: "insideBottomRight", offset: -5 }}
+            />
+            <YAxis domain={[0, 100]} />
+            <Tooltip />
+            <Legend />
+            {snapshotIds.map((sid, i) => (
+              <Line
+                key={sid}
+                type="monotone"
+                dataKey={`snapshot_${sid}`}
+                name={`Snapshot ${sid}`}
+                stroke={`hsl(${(i * 60) % 360}, 70%, 50%)`}
+                dot={false}
+                connectNulls={true}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  )
+}
+
 
   return (
     <div className="w-full min-w-0">
