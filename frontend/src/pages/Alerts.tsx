@@ -42,13 +42,6 @@ export default function Alerts() {
     const [snapshots, setSnapshots] = useState<any[]>([])
 
     useEffect(() => {
-        fetchSnapshots()
-            .then(data => setSnapshots(data))
-            .catch(err => console.error("Failed to fetch snapshots:", err))
-    }, [])
-
-
-    useEffect(() => {
         loadAlerts()
     }, [severityFilter, ackFilter])
 
